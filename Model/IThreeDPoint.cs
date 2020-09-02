@@ -20,8 +20,15 @@ namespace FlightTraining.Model
 
         void SetShiftsData(int index, double[] shifts);
 
+        /// <summary>
+        /// Прибавляет к текущим координатам полученные
+        /// </summary>
         void ChangeCoords(int x = 0, int y = 0, int z = 0);
 
+        /// <summary>
+        /// Заменяет текущие координаты на новые
+        /// </summary>
+        /// <param name="coords"></param>
         void ChangeCoords(Tuple<int, int, int> coords);
 
     }

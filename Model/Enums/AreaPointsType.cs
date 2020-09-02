@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlightTraining.Model
+namespace FlightTraining.Model.Enums
 {
-    public enum FlightStage
+    public enum AreaPointsType
     {
-        Ordinary = 0,
-        Maneuver,
-        HeightHold
+        RestrictedArea = 0
     }
 }

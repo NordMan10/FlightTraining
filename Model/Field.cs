@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using FlightTraining.Model.Enums;
 
 namespace FlightTraining.Model
 {
@@ -19,118 +20,117 @@ namespace FlightTraining.Model
             Height = height;
             ProgramOptions.PixelsInCell = width / ProgramOptions.CellsInHorizontal;
             Points = new Points(this);
-            Planes = new Dictionary<int, IAircraft>();
-            Umvs = new Dictionary<int, IAircraft>();
-            PlanePaths = new Dictionary<int, List<IThreeDPoint>>();
-            UmvPaths = new Dictionary<int, List<IThreeDPoint>>();
-            CreatePaths();
+
+            Aircrafts = new Dictionary<AircraftType, Dictionary<int, IAircraft>>
+            {
+                { AircraftType.Plane, new Dictionary<int, IAircraft>() },
+                { AircraftType.Umv, new Dictionary<int, IAircraft>() }
+            };
+
+            AircraftPaths = new Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>>
+            {
+                { AircraftFlow.Arrive, new Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>() },
+                { AircraftFlow.Depurture, new Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>() },
+                { AircraftFlow.Passing, new Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>() }
+            };
+
+            PointsLabels = new Dictionary<IThreeDPoint, Label>();
         }
 
         public IPoints Points { get; private set; }
 
-        public Dictionary<int, IAircraft> Planes { get; private set; }
+        public Dictionary<AircraftType, Dictionary<int, IAircraft>> Aircrafts { get; private set; }
 
-        public Dictionary<int, IAircraft> Umvs { get; private set; }
+        public Dictionary<IThreeDPoint, Label> PointsLabels { get; private set; }
 
         public int Width { get; private set; }
 
         public int Height { get; private set; }
 
-        public Dictionary<int, List<IThreeDPoint>> PlanePaths { get; private set; }
+        public Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>> AircraftPaths { get; private set; }
 
-        public Dictionary<int, List<IThreeDPoint>> UmvPaths { get; private set; }
 
-        public void AddAircraft(AircraftType type, int trackId, Action<Control> addControl)
+        public void AddAircraft(AircraftType type, AircraftFlow flow, int trackId, Action<Control> addControl)
         {
-            int id;
-            string name;
-            int velocity;
-            string entryTime = string.Format("{0}", Math.Round(model.Stopwatch.Elapsed.TotalSeconds));
-            Image image;
-            var path = new List<IThreeDPoint>();
+            var aircrafts = Aircrafts[type];
 
-            if (type == AircraftType.Plane)
-            {
-                if (Planes.Count > 0) id = Planes[Planes.Keys.Max(key => key)].Id + 1;
-                else id = 0;
-                name = "A";
-                velocity = ProgramOptions.PlaneVelocity;
-                image = new Bitmap(@"images\plane.png");
-                path = PlanePaths[trackId];
+            var id = 0;
+            var entryTime = string.Format("{0}", Math.Round(model.GetStopwatchElapsedTime().TotalSeconds));
 
-                Planes.Add(id, new Aircraft(type, id, name, velocity, entryTime, image, 
-                    ProgramOptions.PlaneImageSize, trackId, path, ProgramOptions.PixelsInCell));
-                addControl(Planes[Planes.Keys.Max(key => key)].InfoForm);
-            }
-            else
-            {
-                if (Umvs.Count > 0) id = Umvs[Umvs.Keys.Max(key => key)].Id + 1;
-                else id = 0;
-                name = "UMV";
-                velocity = ProgramOptions.UmvVelocity;
-                image = new Bitmap(@"images\quadrocopter.png");
-                path = UmvPaths[trackId];
+            if (aircrafts.Count > 0) id = aircrafts[aircrafts.Keys.Max(key => key)].Id + 1;
+            //else id = 0;
 
-                Umvs.Add(id, new Aircraft(type, id, name, velocity, entryTime, image, 
-                    ProgramOptions.UmvImageSize, trackId, path, ProgramOptions.PixelsInCell));
-                addControl(Umvs[Umvs.Keys.Max(key => key)].InfoForm);
-            }
+            var name = AircraftOptions.Names[type];
+            var velocity = AircraftOptions.AircraftVelocities[type];
+            var image = new Bitmap(AircraftOptions.ImagePaths[type]);
+            var path = AircraftPaths[flow][type][trackId];
+
+            aircrafts.Add(id, new Aircraft(type, id, name, velocity, entryTime, image,
+                AircraftOptions.AircraftsImageSizes[type], trackId, path));
+            addControl(aircrafts[aircrafts.Keys.Max(key => key)].InfoForm);
         }
 
         public void RemoveAircraft(AircraftType type, int id, Action<Control> removeControl)
         {
-            if (type == AircraftType.Plane)
-            {
-                removeControl(Planes[id].InfoForm);
-                Planes.Remove(id);
-            }
-            else
-            {
-                removeControl(Umvs[id].InfoForm);
-                Umvs.Remove(id);
-            }
+            var aircrafts = Aircrafts[type];
+            removeControl(aircrafts[id].InfoForm);
+            aircrafts.Remove(id);
         }
 
         public void CreatePaths()
         {
-            PlanePaths.Clear();
-            UmvPaths.Clear();
-            CreatePath(ProgramOptions.PlaneTracks, Points.PlanePoints, AircraftType.Plane);
-            CreatePath(ProgramOptions.UmvTracks, Points.UmvPoints, AircraftType.Umv);
-            CalcShiftData(PlanePaths);
-            CalcShiftData(UmvPaths);
+            AircraftPaths[AircraftFlow.Arrive].Clear();
+            AircraftPaths[AircraftFlow.Depurture].Clear();
+            AircraftPaths[AircraftFlow.Passing].Clear();
+            CreatePath(AircraftOptions.AircraftsTracks, Points.AircraftsPoints);
+            CalcShiftData(AircraftPaths);
         }
 
-        private void CreatePath(Dictionary<int, int?[]> trackSets, List<Dictionary<int, IThreeDPoint>> points, AircraftType type)
+        private void CreatePath(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, int?[][]>>> airflowsTrackSets, 
+            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points)
         {
-            foreach (var trackSet in trackSets)
+            foreach (var airflowTrackSets in airflowsTrackSets)
             {
-                var path = new List<IThreeDPoint>();
-                for (var i = 0; i < trackSet.Value.Length; i++)
+                var aircraftTypePaths = new Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>();
+                foreach (var aircraftTrackSets in airflowTrackSets.Value)
                 {
-                    if (trackSet.Value[i] == null) continue;
-                    path.Add(points[i][(int)trackSet.Value[i]]);
+                    var paths = new Dictionary<int, List<IThreeDPoint>>();
+                    foreach (var trackSet in aircraftTrackSets.Value)
+                    {
+                        var path = GetPath(aircraftTrackSets.Key, trackSet, points);
+                        paths.Add(trackSet.Key, path);
+                    }
+                    aircraftTypePaths.Add(aircraftTrackSets.Key, paths);
                 }
-                if (type == AircraftType.Plane)
-                {
-                    PlanePaths.Add(trackSet.Key, path);
-                }
-                else
-                {
-                    UmvPaths.Add(trackSet.Key, path);
-                }
+                AircraftPaths[airflowTrackSets.Key] = aircraftTypePaths;
             }
         }
 
-        private void CalcShiftData(Dictionary<int, List<IThreeDPoint>> paths)
+        public List<IThreeDPoint> GetPath(AircraftType type, KeyValuePair<int, int?[][]> trackSet, 
+            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points)
         {
-            foreach (var path in paths)
+            var path = new List<IThreeDPoint>();
+            for (var trackPointSetIndex = 0; trackPointSetIndex < trackSet.Value.Length; trackPointSetIndex++)
             {
-                for (var i = path.Value.Count - 1; i > 0; i--)
+                if (trackSet.Value[trackPointSetIndex] == null) continue;
+                var pointsIdsSet = trackSet.Value[trackPointSetIndex];
+                for (var i = 0; i < pointsIdsSet.Length; i++)
                 {
-                    path.Value[i - 1].SetShiftsData(path.Key, GetAngles(path.Value[i - 1], path.Value[i]));
+                    var collectionList = points[type];
+                    var pointId = (int)pointsIdsSet[i];
+                    path.Add(collectionList[trackPointSetIndex][pointId]);
                 }
             }
+            return path;
+        }
+
+        private void CalcShiftData(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, List<IThreeDPoint>>>> aircraftsFlows)
+        {
+            foreach (var aircraftsFlow in aircraftsFlows.Values)
+            foreach (var paths in aircraftsFlow.Values)
+                foreach (var path in paths)
+                    for (var i = path.Value.Count - 1; i > 0; i--)
+                        path.Value[i - 1].SetShiftsData(path.Key, GetAngles(path.Value[i - 1], path.Value[i]));
         }
 
         private double[] GetAngles(IThreeDPoint startPoint, IThreeDPoint endPoint)
@@ -144,13 +144,8 @@ namespace FlightTraining.Model
             else
             {
                 angleH = Math.Atan(dy / dx);
-                if (angleH < 0)
-                {
-                    if (dx < 0) angleH += Math.PI;
-                    else angleH += Math.PI / 2;
-                }
-                else if (angleH > 0)
-                    if (dx < 0) angleH += Math.PI;
+                if (dx < 0)
+                    angleH += Math.PI;
             }
 
             var angleV = Math.Atan(dz / hypotenuseH);
@@ -165,30 +160,44 @@ namespace FlightTraining.Model
 
             ProgramOptions.PixelsInCell = Math.Min(Width / ProgramOptions.CellsInHorizontal, Height / ProgramOptions.CellsInVertical);
 
-            SaveAircraftOldPaths();
-            Points.InitAllPoints();
+            SaveOldAircraftPaths();
+            Points.UpdateAllPointsCoords();
             UpdateAircraftLocAndShifts();
         }
 
-        private void SaveAircraftOldPaths()
+        private void SaveOldAircraftPaths()
         {
-            foreach (var plane in Planes.Values)
-                plane.SaveOldPath();
-            foreach (var umv in Umvs.Values)
-                umv.SaveOldPath();
+            foreach (var aircrafts in Aircrafts.Values)
+                foreach (var aircraft in aircrafts.Values)
+                    aircraft.SaveOldPath();
         }
 
         private void UpdateAircraftLocAndShifts()
         {
-            foreach (var plane in Planes.Values)
-                plane.UpdateLocationAndShifts();
-            foreach (var plane in Umvs.Values)
-                plane.UpdateLocationAndShifts();
+            foreach (var aircrafts in Aircrafts.Values)
+                foreach (var aircraft in aircrafts.Values)
+                    aircraft.UpdateLocationAndShifts();
         }
 
         public List<IThreeDPoint> GetRestrZonePoints()
         {
-            return Points.RestrictedArea;
+            return Points.AreaPoints[AreaPointsType.RestrictedArea];
+        }
+
+        public void AddPointsLabels(Action<Control> addControl)
+        {
+            Points.CreatePointsLabels(PointsLabels);
+
+            foreach (var label in PointsLabels.Values)
+                addControl(label);
+        }
+
+        public void UpdateLabelsLocation()
+        {
+            foreach (var labelSet in PointsLabels)
+            {
+                labelSet.Value.Location = new Point(labelSet.Key.X, labelSet.Key.Y);
+            }
         }
 
     }

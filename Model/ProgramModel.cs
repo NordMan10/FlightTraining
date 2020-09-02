@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
 
@@ -14,8 +13,6 @@ namespace FlightTraining.Model
 
         public Stopwatch Stopwatch { get; private set; }
 
-        public Timer GraphicTimer { get; private set; }
-
         public GameStage Stage { get; private set; }
 
         public event Action<GameStage> StageChanged;
@@ -23,14 +20,13 @@ namespace FlightTraining.Model
         public void Begin()
         {
             Stopwatch = new Stopwatch();
-            InitGraphicTimer();
+
             ChangeStage(GameStage.Started);
         }
 
         public void Start()
         {
             Stopwatch.Start();
-            GraphicTimer.Start();
 
             ChangeStage(GameStage.Simulating);
         }
@@ -38,7 +34,6 @@ namespace FlightTraining.Model
         public void Stop()
         {
             Stopwatch.Reset();
-            GraphicTimer.Stop();
             
             ChangeStage(GameStage.Started);
         }
@@ -46,14 +41,8 @@ namespace FlightTraining.Model
         public void Pause()
         {
             Stopwatch.Stop();
-            GraphicTimer.Stop();
 
             ChangeStage(GameStage.Paused);
-        }
-
-        private void InitGraphicTimer()
-        {
-            GraphicTimer = new Timer { Interval = ProgramOptions.GraphicTimerInterval };
         }
 
         private void ChangeStage(GameStage stage)
@@ -61,6 +50,16 @@ namespace FlightTraining.Model
             Stage = stage;
             StageChanged?.Invoke(stage);
         }
+
+        public TimeSpan GetStopwatchElapsedTime()
+        {
+            return Stopwatch.Elapsed;
+        }
+
+        //void SetGraphicTimer_TickEvent(event Action action)
+        //{
+        //    GraphicTimer += action;
+        //}
 
     }
 }

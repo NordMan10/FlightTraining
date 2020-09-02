@@ -28,5 +28,10 @@ namespace FlightTraining.Model
         {
             return (int)(pixels / ProgramOptions.PixelsInCell * ProgramOptions.MetersInCell);
         }
+
+        //public static Tuple<int, int, int> ConvertFromProgramToScheme(int x, int y, int z)
+        //{
+        //    return Tuple.Create(ConvertPixelsToMeters(y), z, ConvertPixelsToMeters(x));
+        //}
     }
 }

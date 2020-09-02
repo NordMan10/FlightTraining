@@ -6,10 +6,6 @@ namespace FlightTraining.Model
 {
     public interface IProgramModel
     {
-        Stopwatch Stopwatch { get; }
-
-        Timer GraphicTimer { get; }
-
         GameStage Stage { get; }
 
         event Action<GameStage> StageChanged;
@@ -21,5 +17,7 @@ namespace FlightTraining.Model
         void Stop();
 
         void Pause();
+
+        TimeSpan GetStopwatchElapsedTime();
     }
 }

@@ -1,36 +1,25 @@
-﻿using System;
+﻿using FlightTraining.Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms;
+
 
 namespace FlightTraining.Model
 {
     public interface IPoints
     {
-        List<Tuple<Point, Point>> XLayoutPoints { get; }
+        Dictionary<LayoutPointsType, List<Tuple<Point, Point>>> LayoutPoints { get; }
 
-        List<Tuple<Point, Point>> YLayoutPoints { get; }
+        Dictionary<AreaPointsType, List<IThreeDPoint>> AreaPoints { get; }
 
-        List<IThreeDPoint> RestrictedArea { get; }
+        Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> AircraftsPoints { get; }
 
-        Dictionary<int, IThreeDPoint> StartPlanePoints { get; }
+        void UpdateAllPointsCoords();
 
-        Dictionary<int, IThreeDPoint> StartUmvPoints { get; }
+        Label SetLabel(Point location, string text);
 
-        Dictionary<int, IThreeDPoint> FinishPlanePoints { get; }
-
-        Dictionary<int, IThreeDPoint> OtherUmvPoints { get; } // при данной задаче решение: оставшуюся точку сбросить в один список, 
-                                                              // сработает, но при добавлении других точек, надо будет что-то делать
-        Dictionary<int, IThreeDPoint> FinishUmvPoints { get; }
-
-        List<Dictionary<int, IThreeDPoint>> PlanePoints { get; }
-
-        List<Dictionary<int, IThreeDPoint>> UmvPoints { get; }
-
-        void UpdateLayoutCoords();
-
-        void UpdateAircraftPointsCoords(int dw, int dh);
-
-        void InitAllPoints();
+        void CreatePointsLabels(Dictionary<IThreeDPoint, Label> pointsLabels);
 
     }
 }

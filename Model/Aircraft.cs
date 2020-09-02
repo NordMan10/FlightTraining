@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Xml.Serialization;
 
 namespace FlightTraining.Model
 {
     public class Aircraft : IAircraft
     {
         public Aircraft(AircraftType type, int id, string name, int velocity, string entryTime,
-            Image image, int imageSize, int trackId_, List<IThreeDPoint> path, int pixelsInCell_)
+            Image image, int imageSize, int trackId_, List<IThreeDPoint> path)
         {
             Type = type;
             Id = id;
@@ -26,7 +25,6 @@ namespace FlightTraining.Model
             InitInfoForm();
             Shifts = new Shifts();
             Tracker = 0;
-            NeedToRemove = false;
             TrackId = trackId_;
             Path = path;
             FlightStageChanged += Aircraft_FlightStageChanged;
@@ -73,8 +71,6 @@ namespace FlightTraining.Model
 
         public int Tracker { get; private set; }
 
-        public bool NeedToRemove { get; private set; }
-
         public FlightStage FlightStage { get; private set; }
 
 
@@ -117,7 +113,6 @@ namespace FlightTraining.Model
             InfoForm.Text = Name + "\n" + ((int)Z).ToString() + " | " + Velocity.ToString();
             InfoForm.TextAlign = ContentAlignment.MiddleCenter;
             InfoForm.Font = new Font("Roboto", 10F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            //InfoForm.ForeColor = Color.White;
             InfoForm.BorderStyle = BorderStyle.FixedSingle;
             InfoForm.FlatStyle = FlatStyle.Flat;
             InfoForm.BackColor = Color.FromArgb(0x7F, 0xFF, 0xFF, 0xFF);
@@ -133,10 +128,14 @@ namespace FlightTraining.Model
 
             UpdateInfoForm();
         }
+        public void CheckToChangePath()
+        {
+            if (IsPointNear()) ChangeShifts();
+        }
 
         private void CheckToHeightHold()
         {
-            if (Z >= ProgramOptions.UmvTrackGainHeight[TrackId])
+            if (Type == AircraftType.Umv && Z >= AircraftOptions.UmvTracksGainHeight[TrackId])
                 ChangeFlightStage(FlightStage.HeightHold);
         }
 
@@ -144,11 +143,6 @@ namespace FlightTraining.Model
         {
             InfoForm.Location = new Point((int)X + ImageSize, (int)Y - InfoForm.Height - ImageSize / 2);
             InfoForm.Text = Name + "\n" + ((int)Z).ToString() + " | " + Velocity.ToString();
-        }
-
-        public void CheckToChangePath()
-        {
-            if (IsPointNear()) ChangeShifts();
         }
 
         private void ChangeShifts()
@@ -161,7 +155,7 @@ namespace FlightTraining.Model
             else
             {
                 Shifts.Dx = Shifts.Dy = Shifts.Dz = 0;
-                NeedToRemove = true;
+                FlightStage = FlightStage.NeedToRemove;
             }
             
         }
@@ -170,7 +164,7 @@ namespace FlightTraining.Model
         {
             var dx = Math.Abs(Path[Tracker + 1].X - X);
             var dy = Math.Abs(Path[Tracker + 1].Y - Y);
-            if (dx + dy <= ProgramOptions.CloseDistance) return true;
+            if (dx + dy <= AircraftOptions.CloseDistance) return true;
             else return false;
         }
 
@@ -190,7 +184,7 @@ namespace FlightTraining.Model
 
             SetShifts(shifts, directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
                 directShift * Math.Sin(Path[tracker].ShiftsData[TrackId][0]),
-                GetHeightManeuverShift(HeightToGain, ProgramOptions.TimeToGainHeight));
+                GetHeightManeuverShift(HeightToGain, AircraftOptions.TimeToGainHeight));
         }
 
         private void CalcAndSetShifts_HeightHold(int tracker, Shifts shifts = null)
@@ -219,6 +213,12 @@ namespace FlightTraining.Model
 
         public void SetHeightToGain(int height) { HeightToGain = height; }
 
+        /// <summary>
+        /// Возвращает сдвиг для манёвра по высоте
+        /// </summary>
+        /// <param name="height">Высота в метрах, которую необходимио набрать</param>
+        /// <param name="time">Время в секундах, за которое необходимо набрать высоту</param>
+        /// <returns></returns>
         private double GetHeightManeuverShift(int height, int time)
         {
             var dh = height - Z;
@@ -234,36 +234,23 @@ namespace FlightTraining.Model
             return Velocity / ProgramOptions.TimeCoafficient / ProgramOptions.MetersInCell * ProgramOptions.PixelsInCell;
         }
 
-        public void UpdateLocationAndShifts() // РЕФАКТОРИНГ
+        public void UpdateLocationAndShifts()
         {
-            var ratioX = (double)Math.Abs(Path[Tracker + 1].X - Path[Tracker].X) / (double)Math.Abs(OldPointsCoords.Item2.X - OldPointsCoords.Item1.X);
-            if (Math.Abs(OldPointsCoords.Item2.X - OldPointsCoords.Item1.X) == 0)
-            {
-                ratioX = Path[Tracker].X - OldPointsCoords.Item1.X;
-                X += ratioX;
-            }
-            else X *= ratioX;
-
-            var ratioY = (double)Math.Abs(Path[Tracker + 1].Y - Path[Tracker].Y) / (double)Math.Abs(OldPointsCoords.Item2.Y - OldPointsCoords.Item1.Y);
-            if (Math.Abs(OldPointsCoords.Item2.Y - OldPointsCoords.Item1.Y) == 0)
-            {
-                ratioY = Path[Tracker].Y - OldPointsCoords.Item1.Y;
-                Y += ratioY;
-            }
-            else Y *= ratioY;
-
-
-            //var startHeight = 800;
-
-            //var similarityRatio = Z / startHeight;
-
-            //var dx = (double)Math.Abs(Path[tracker + 1].X - Path[tracker].X);
-            //var dy = (double)Math.Abs(Path[tracker + 1].Y - Path[tracker].Y);
-
-            //X = Path[tracker].X + (dx * (1 - similarityRatio));
-            //Y = Path[tracker].Y + (dy * (1 - similarityRatio));
+            X = UpdateCoordinate(X, Path[Tracker + 1].X, Path[Tracker].X, OldPointsCoords.Item2.X, OldPointsCoords.Item1.X);
+            Y = UpdateCoordinate(Y, Path[Tracker + 1].Y, Path[Tracker].Y, OldPointsCoords.Item2.Y, OldPointsCoords.Item1.Y);
 
             Invoke_CalculationShifts(Tracker);
+        }
+
+        private double UpdateCoordinate(double coord, int newFinishPointCoord, int newStartPointCoord, int oldFinishPointCoord, int oldStartPointCoord)
+        {
+            var ratio = (double)Math.Abs(newFinishPointCoord - newStartPointCoord) / Math.Abs(oldFinishPointCoord - oldStartPointCoord);
+            if (Math.Abs(oldFinishPointCoord - oldStartPointCoord) == 0)
+            {
+                ratio = newStartPointCoord - oldStartPointCoord;
+                return coord += ratio;
+            }
+            else return coord *= ratio;
         }
 
         public void SaveOldPath()
@@ -271,27 +258,23 @@ namespace FlightTraining.Model
             OldPointsCoords = Tuple.Create(new Point(Path[Tracker].X, Path[Tracker].Y), new Point(Path[Tracker + 1].X, Path[Tracker + 1].Y));
         }
 
-        /// <summary>
-        /// Изменяет значение сдвига по вертикали для набора указанной высоты за указанное время
-        /// </summary>
-        /// <param name="height">Высота в метрах, которую нужно набрать</param>
-        /// <param name="time">Время в секундах, за которое нужно набрать высоту</param>
-
         public void ChangeFlightStage(FlightStage stage)
         {
             FlightStage = stage;
             FlightStageChanged.Invoke(stage);
         }
 
-
-        /// <summary>
-        /// Вызывает метод, возвращающий точку, в которой окажется ВС через указанный промежуток времени
-        /// </summary>
-        /// <returns></returns>
         public IThreeDPoint GetFutureLocation()
         {
             return futureLocation.GetFutureLocation(X, Y, Z, Shifts.Dx, Shifts.Dy, Shifts.Dz, 
-                Tracker, Path, CalcAndSetShifts, ProgramOptions.PredictInterval);
+                Tracker, Path, CalcAndSetShifts, AircraftOptions.PredictInterval);
+        }
+
+        public FlightStage GetFlightStage() { return FlightStage; }
+
+        public Tuple<double, double, double> GetCoords()
+        {
+            return Tuple.Create(X, Y, Z);
         }
     }
 }

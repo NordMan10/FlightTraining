@@ -15,7 +15,9 @@ namespace FlightTraining.Model
                     {
                         AircraftType.Plane, new Dictionary<int, int?[][]>()
                         {
-                            { 0, new int?[][] { new int?[] { 0 }, new int?[] { 0 } } }
+                            { 0, new int?[][] { new int?[] { 0 }, new int?[] { 0 } } },
+                            { 1, new int?[][] { new int?[] { 2 }, new int?[] { 0 } } },
+                            { 2, new int?[][] { new int?[] { 3 }, new int?[] { 0 } } },
                         }
                     }
                 }

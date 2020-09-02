@@ -10,20 +10,10 @@ namespace FlightTraining.Model
     {
         AircraftType Type { get; }
         int Id { get; }
-        string Name { get; }
-        double X { get; }
-        double Y { get; }
-        double Z { get; }
-        int Velocity { get; }
-        int HeightToGain { get; }
-        string EntryTime { get; }
         Image Image { get; }
         int ImageSize { get; }
         Label InfoForm { get; }
         int TrackId { get; }
-        List<IThreeDPoint> Path { get; }
-        bool NeedToRemove { get; } // сделать метод проверки состояния
-        FlightStage FlightStage { get; }
         void Move();
 
         /// <summary>
@@ -31,6 +21,10 @@ namespace FlightTraining.Model
         /// </summary>
         void CheckToChangePath();
 
+        /// <summary>
+        /// Вызывает метод, возвращающий точку, в которой окажется ВС через указанный промежуток времени
+        /// </summary>
+        /// <returns></returns>
         IThreeDPoint GetFutureLocation();
 
         void UpdateLocationAndShifts();
@@ -40,5 +34,9 @@ namespace FlightTraining.Model
         void ChangeFlightStage(FlightStage stage);
 
         void SetHeightToGain(int height);
+
+        FlightStage GetFlightStage();
+
+        Tuple<double, double, double> GetCoords();
     }
 }

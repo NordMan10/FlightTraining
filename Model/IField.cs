@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlightTraining.Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -12,15 +13,11 @@ namespace FlightTraining.Model
 
         int Height { get; }
 
-        Dictionary<int, IAircraft> Planes { get; }
+        Dictionary<AircraftType, Dictionary<int, IAircraft>> Aircrafts { get; }
 
-        Dictionary<int, IAircraft> Umvs { get; }
+        Dictionary<IThreeDPoint, Label> PointsLabels { get; }
 
-        Dictionary<int, List<IThreeDPoint>> PlanePaths { get; }
-
-        Dictionary<int, List<IThreeDPoint>> UmvPaths { get; }
-
-        void AddAircraft(AircraftType type, int trackId, Action<Control> addControl);
+        void AddAircraft(AircraftType type, AircraftFlow flow, int trackId, Action<Control> addControl);
 
         void RemoveAircraft(AircraftType type, int id, Action<Control> removeControl);
 
@@ -29,5 +26,13 @@ namespace FlightTraining.Model
         void CreatePaths();
 
         List<IThreeDPoint> GetRestrZonePoints();
+
+        List<IThreeDPoint> GetPath(AircraftType type, KeyValuePair<int, int?[][]> trackSet,
+            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points);
+
+        void AddPointsLabels(Action<Control> addControl);
+
+        void UpdateLabelsLocation();
+
     }
 }

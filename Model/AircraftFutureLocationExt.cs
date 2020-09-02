@@ -5,10 +5,7 @@ namespace FlightTraining.Model
 {
     public class AircraftFutureLocationExt
     {
-        public AircraftFutureLocationExt()
-        {
-
-        }
+        public AircraftFutureLocationExt() { }
 
         private double x = 0;
         private double y = 0;
@@ -78,7 +75,7 @@ namespace FlightTraining.Model
         {
             var dx = Math.Abs(path[tracker + 1].X - x);
             var dy = Math.Abs(path[tracker + 1].Y - y);
-            if (dx + dy <= ProgramOptions.CloseDistance) return true;
+            if (dx + dy <= AircraftOptions.CloseDistance) return true;
             else return false;
         }
 

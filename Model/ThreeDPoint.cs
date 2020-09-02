@@ -38,10 +38,7 @@ namespace FlightTraining.Model
                 ShiftsData.Add(new double[] { });
             ShiftsData[index] = shiftsData;
         }
-
-        /// <summary>
-        /// Прибавляет к текущим координатам полученные
-        /// </summary>
+        
         public void ChangeCoords(int x = 0, int y = 0, int z = 0)
         {
             X += x;
@@ -49,10 +46,7 @@ namespace FlightTraining.Model
             Z += z;
         }
 
-        /// <summary>
-        /// Изменяет текущие координаты на новые
-        /// </summary>
-        /// <param name="coords"></param>
+        
         public void ChangeCoords(Tuple<int, int, int> coords)
         {
             X = coords.Item1;
