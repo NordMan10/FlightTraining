@@ -56,7 +56,7 @@ namespace FlightTraining.Model
             { AircraftType.Umv, 50 }
         };
 
-        public static readonly Tuple<int, int> AircraftInterval = Tuple.Create(20000, 40000);
+        public static readonly Tuple<int, int> AircraftInterval = Tuple.Create(30000, 50000);
 
         public static readonly Dictionary<AircraftType, int> AircraftsImageSizes = new Dictionary<AircraftType, int>
         {

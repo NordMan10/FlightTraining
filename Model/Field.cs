@@ -68,6 +68,7 @@ namespace FlightTraining.Model
             aircrafts.Add(id, new Aircraft(type, id, name, velocity, entryTime, image,
                 AircraftOptions.AircraftsImageSizes[type], trackId, path));
             addControl(aircrafts[aircrafts.Keys.Max(key => key)].InfoForm);
+            aircrafts.Last().Value.InfoForm.BringToFront();
         }
 
         public void RemoveAircraft(AircraftType type, int id, Action<Control> removeControl)
@@ -189,7 +190,9 @@ namespace FlightTraining.Model
             Points.CreatePointsLabels(PointsLabels);
 
             foreach (var label in PointsLabels.Values)
+            {
                 addControl(label);
+            }
         }
 
         public void UpdateLabelsLocation()
