@@ -1,6 +1,5 @@
 ﻿using FlightTraining.Model;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -29,7 +28,7 @@ namespace FlightTraining.Views
             startButton.Click += StartButton_Click;
             pauseButton.Click += PauseButton_Click;
 
-            model.GraphicTimer.Tick += GraphicTimer_Tick;
+            graphicTimer.Tick += GraphicTimer_Tick;
             clockTimer.Tick += ClockTimer_Tick;
 
             configured = true;
@@ -37,7 +36,8 @@ namespace FlightTraining.Views
 
         private void ClockTimer_Tick(object sender, EventArgs e)
         {
-            clock.Text = string.Format("{0:00}:{1:00}:{2:00}", model.Stopwatch.Elapsed.Minutes, model.Stopwatch.Elapsed.Seconds, model.Stopwatch.Elapsed.Milliseconds / 10);
+            var elapsedTime = model.GetStopwatchElapsedTime();
+            clock.Text = string.Format("{0:00}:{1:00}:{2:00}", elapsedTime.Minutes, elapsedTime.Seconds, elapsedTime.Milliseconds / 10);
         }
 
         private void GraphicTimer_Tick(object sender, EventArgs e) 
@@ -68,7 +68,6 @@ namespace FlightTraining.Views
 
             fieldControl.RemoveAllAircrafts();
             fieldControl.Invalidate();
-            fieldControl.AddFirstAircrafts();
 
             clock.Text = "00:00:00";
 
@@ -112,6 +111,7 @@ namespace FlightTraining.Views
             model.Start();
             fieldControl.StartTimers();
             clockTimer.Start();
+            graphicTimer.Start();
         }
 
         private void StopAllTimers(GameStage stage = GameStage.Started)
@@ -120,6 +120,7 @@ namespace FlightTraining.Views
             else model.Stop();
             fieldControl.StopTimers();
             clockTimer.Stop();
+            graphicTimer.Stop();
         }
     }
 }

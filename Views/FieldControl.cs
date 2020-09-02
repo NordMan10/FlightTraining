@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using FlightTraining.Model;
 using System.Drawing;
-using System.Security.Cryptography.X509Certificates;
+using FlightTraining.Model.Enums;
 
 namespace FlightTraining.Views
 {
@@ -27,38 +27,54 @@ namespace FlightTraining.Views
             addControl = control => Controls.Add(control);
             removeControl = control => Controls.Remove(control);
 
-            PlaneTimer = UmvTimer = new Timer();
+            ArrivePlaneTimer = new Timer();
+            DepPlaneTimer = new Timer();
+            UmvTimer = new Timer();
+
             InitTimers();
         }
 
-        public Timer PlaneTimer { get; private set; }
+        public Timer ArrivePlaneTimer { get; private set; }
+
+        public Timer DepPlaneTimer { get; private set; }
 
         public Timer UmvTimer { get; private set; }
 
         private void InitTimers()
         {
-            PlaneTimer = new Timer();
+            ArrivePlaneTimer = new Timer();
+            DepPlaneTimer = new Timer();
             UmvTimer = new Timer();
-            PlaneTimer.Interval = GetRandomTimerInterval();
+            ArrivePlaneTimer.Interval = GetRandomTimerInterval();
+            DepPlaneTimer.Interval = GetRandomTimerInterval();
             UmvTimer.Interval = GetRandomTimerInterval();
-            PlaneTimer.Tick += PlaneTimer_Tick;
+            ArrivePlaneTimer.Tick += ArrivePlaneTimer_Tick;
+            DepPlaneTimer.Tick += DepPlaneTimer_Tick;
             UmvTimer.Tick += UmvTimer_Tick;
         }
 
-        private void PlaneTimer_Tick(object sender, EventArgs e)
+        private void ArrivePlaneTimer_Tick(object sender, EventArgs e)
         {
-            AircraftTimer_TickHandler(AircraftType.Plane, ProgramOptions.PlaneTracks.Count, PlaneTimer);
+            AircraftTimer_TickHandler(AircraftType.Plane, AircraftFlow.Arrive, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Arrive][AircraftType.Plane].Count, ArrivePlaneTimer);
+        }
+
+        private void DepPlaneTimer_Tick(object sender, EventArgs e)
+        {
+            AircraftTimer_TickHandler(AircraftType.Plane, AircraftFlow.Depurture, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Depurture][AircraftType.Plane].Count, DepPlaneTimer);
         }
 
         private void UmvTimer_Tick(object sender, EventArgs e)
         {
-            AircraftTimer_TickHandler(AircraftType.Umv, ProgramOptions.UmvTracks.Count, UmvTimer);
+            AircraftTimer_TickHandler(AircraftType.Umv, AircraftFlow.Passing, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Passing][AircraftType.Umv].Count, UmvTimer);
         }
 
-        private void AircraftTimer_TickHandler(AircraftType type, int tracksCount, Timer timer)
+        private void AircraftTimer_TickHandler(AircraftType type, AircraftFlow flow, int tracksCount, Timer timer)
         {
             var randomTrackId = GetRandomTrackId(0, tracksCount);
-            field.AddAircraft(type, randomTrackId, addControl);
+            field.AddAircraft(type, flow, randomTrackId, addControl);
             timer.Interval = GetRandomTimerInterval();
         }
 
@@ -69,14 +85,17 @@ namespace FlightTraining.Views
 
         private int GetRandomTimerInterval()
         {
-            return ProgramOptions.Random.Next(ProgramOptions.AircraftInterval.Item1, ProgramOptions.AircraftInterval.Item2);
+            return ProgramOptions.Random.Next(AircraftOptions.AircraftInterval.Item1, AircraftOptions.AircraftInterval.Item2);
         }
 
         public void AddFirstAircrafts()
         {
-            field.AddAircraft(AircraftType.Plane, GetRandomTrackId(0, ProgramOptions.PlaneTracks.Count - 1), addControl);
-            field.AddAircraft(AircraftType.Umv, 1/*GetRandomTrackId(0, ProgramOptions.UmvTracks.Count - 1)*/, addControl);
-
+            field.AddAircraft(AircraftType.Plane, AircraftFlow.Arrive, GetRandomTrackId(0, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Arrive][AircraftType.Plane].Count - 1), addControl);
+            field.AddAircraft(AircraftType.Plane, AircraftFlow.Depurture, GetRandomTrackId(0, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Depurture][AircraftType.Plane].Count - 1), addControl);
+            field.AddAircraft(AircraftType.Umv, AircraftFlow.Passing, GetRandomTrackId(0, 
+                AircraftOptions.AircraftsTracks[AircraftFlow.Passing][AircraftType.Umv].Count), addControl); 
         }
 
         private void FieldControl_Resize(object sender, EventArgs e)
@@ -85,6 +104,7 @@ namespace FlightTraining.Views
             {
                 field.UpdateCoords(Width, Height);
                 field.CreatePaths();
+                field.UpdateLabelsLocation();
                 Invalidate();
             }
         }
@@ -94,6 +114,8 @@ namespace FlightTraining.Views
             if (configured) return;
             model = model_;
             field = new Field(model, Width, Height);
+
+            field.AddPointsLabels(addControl);
 
             Invalidate();
             configured = true;
@@ -105,38 +127,21 @@ namespace FlightTraining.Views
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            e.Graphics.DrawLayout(field.Points.XLayoutPoints, field.Points.YLayoutPoints);
-            e.Graphics.DrawRestrZone(field.Points.RestrictedArea);
+            e.Graphics.DrawLayout(field.Points.LayoutPoints[LayoutPointsType.XAxis], field.Points.LayoutPoints[LayoutPointsType.YAxis]);
+            e.Graphics.DrawRestrZone(field.Points.AreaPoints[AreaPointsType.RestrictedArea]);
             
-            var planeTrajectories = GetTrajectoryPoints(ProgramOptions.PlaneTracks, field.Points.PlanePoints);
-            e.Graphics.DrawPlaneTrajectories(planeTrajectories, GraphicsExtensions.PlaneTrajectoryPen);
-
-            var umvTrajectories = GetTrajectoryPoints(ProgramOptions.UmvTracks, field.Points.UmvPoints);
-            e.Graphics.DrawPlaneTrajectories(umvTrajectories, GraphicsExtensions.UmvTrajectoryPen);
+            var aircraftTrajectories = GetTrajectoryPoints(AircraftOptions.AircraftsTracks, field.Points.AircraftsPoints);
+            e.Graphics.DrawAircraftTrajectories(aircraftTrajectories);
             
-            var planePoints = GetAircraftPoints(field.Points.PlanePoints);
+            var planePoints = GetAircraftPoints(field.Points.AircraftsPoints[AircraftType.Plane]);
             e.Graphics.DrawAircraftPoints(planePoints, GraphicsExtensions.PlanePointsBrush);
 
-            var umvPoints = GetAircraftPoints(field.Points.UmvPoints);
+            var umvPoints = GetAircraftPoints(field.Points.AircraftsPoints[AircraftType.Umv]);
             e.Graphics.DrawAircraftPoints(umvPoints, GraphicsExtensions.UmvPointsBrush);
             
-            e.Graphics.DrawAircrafts(field.Planes);
-            e.Graphics.DrawAircrafts(field.Umvs);
+            e.Graphics.DrawAircrafts(field.Aircrafts);
 
-            foreach (var plane in field.Planes.Values)
-            {
-                var futureLocation = plane.GetFutureLocation();
-                var rect = new Rectangle(futureLocation.X - 5, futureLocation.Y - 5, 10, 10);
-                e.Graphics.DrawRoundPoint(rect, GraphicsExtensions.OrdinaryPen, GraphicsExtensions.PlanePointsBrush);
-            }
-
-            foreach (var umv in field.Umvs.Values)
-            {
-                var futureLocation = umv.GetFutureLocation();
-                var rect = new Rectangle(futureLocation.X - 5, futureLocation.Y - 5, 10, 10);
-                e.Graphics.DrawRoundPoint(rect, GraphicsExtensions.OrdinaryPen, GraphicsExtensions.UmvPointsBrush);
-            }
-
+            e.Graphics.DrawFuturePoints(field.Aircrafts);
         }
 
         private List<IThreeDPoint> GetAircraftPoints(List<Dictionary<int, IThreeDPoint>> airctaftPoints)
@@ -148,34 +153,47 @@ namespace FlightTraining.Views
             return result;
         }
 
-        private List<Tuple<Point, Point>> GetTrajectoryPoints(Dictionary<int, int?[]> tracks, List<Dictionary<int, IThreeDPoint>> points)
+        private List<Tuple<AircraftType, Point, Point>> GetTrajectoryPoints(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary< int, int?[][]>>>airflowsTrackSets,
+            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points)
         {
-            var result = new List<Tuple<Point, Point>>();
-            foreach (var track in tracks)
+            var result = new List<Tuple<AircraftType, Point, Point>>();
+
+            foreach (var airflowTrackSets in airflowsTrackSets)
             {
                 var path = new List<IThreeDPoint>();
-                for (var i = 0; i < track.Value.Length; i++)
+                foreach (var aircraftTrackSet in airflowTrackSets.Value)
                 {
-                    if (track.Value[i] == null) continue;
-                    path.Add(points[i][(int)track.Value[i]]);
-                }
-                for (var i = 0; i < path.Count - 1; i++)
-                {
-                    result.Add(Tuple.Create(new Point(path[i].X, path[i].Y), new Point(path[i + 1].X, path[i + 1].Y)));
+                    var type = aircraftTrackSet.Key;
+                    foreach (var trackSet in aircraftTrackSet.Value)
+                    {
+                        path = field.GetPath(type, trackSet, points);
+                        FillResult(type, ref result, path);
+                    }
                 }
             }
+                
             return result;
+        }
+
+        private void FillResult(AircraftType type, ref List<Tuple<AircraftType, Point, Point>> result, List<IThreeDPoint> path)
+        {
+            for (var i = 0; i < path.Count - 1; i++)
+            {
+                result.Add(Tuple.Create(type, new Point(path[i].X, path[i].Y), new Point(path[i + 1].X, path[i + 1].Y)));
+            }
         }
 
         public void StartTimers()
         {
-            PlaneTimer.Start();
+            ArrivePlaneTimer.Start();
+            DepPlaneTimer.Start();
             UmvTimer.Start();
         }
 
         public void StopTimers()
         {
-            PlaneTimer.Stop();
+            ArrivePlaneTimer.Stop();
+            DepPlaneTimer.Stop();
             UmvTimer.Stop();
         }
 
@@ -184,40 +202,37 @@ namespace FlightTraining.Views
         /// </summary>
         public void MoveAllAircrafts()
         {
-            UpdateAircrafts(field.Planes);
-            UpdateAircrafts(field.Umvs);
+            UpdateAircrafts(field.Aircrafts);
         }
 
-        private void UpdateAircrafts(Dictionary<int, IAircraft> aircrafts)
+        private void UpdateAircrafts(Dictionary<AircraftType, Dictionary<int, IAircraft>> aircraftSets)
         {
-            var idToRemove = new List<int>();
-            foreach (var aircraft in aircrafts.Values)
-            {
-                aircraft.CheckToChangePath();
-                if (aircraft.NeedToRemove) idToRemove.Add(aircraft.Id);
-                else aircraft.Move();
-            }
-            for (var i = 0; i < idToRemove.Count; i++)
-            {
-                field.RemoveAircraft(aircrafts[idToRemove[i]].Type, idToRemove[i], removeControl);
-            }
+            var aircraftToRemove = new List<IAircraft>();
+            foreach (var aircrafts in field.Aircrafts.Values)
+                foreach (var aircraft in aircrafts.Values)
+                {
+                    aircraft.CheckToChangePath();
+                    if (aircraft.GetFlightStage() == FlightStage.NeedToRemove) aircraftToRemove.Add(aircraft);
+                    else aircraft.Move();
+                }
+                for (var i = 0; i < aircraftToRemove.Count; i++)
+                    field.RemoveAircraft(aircraftToRemove[i].Type, aircraftToRemove[i].Id, removeControl);
         }
 
         public void RemoveAllAircrafts()
         {
-            var planeIds = field.Planes.Keys.ToList();
-            for (var i = 0; i < planeIds.Count; i++)
-                field.RemoveAircraft(field.Planes[planeIds[i]].Type, planeIds[i], removeControl);
-
-            var umvIds = field.Umvs.Keys.ToList();
-            for (var i = 0; i < umvIds.Count; i++)
-                field.RemoveAircraft(field.Umvs[umvIds[i]].Type, umvIds[i], removeControl);
+            foreach (var aircrafts in field.Aircrafts.Values)
+            {
+                var planeIds = aircrafts.Keys.ToList();
+                for (var i = 0; i < planeIds.Count; i++)
+                    field.RemoveAircraft(aircrafts[planeIds[i]].Type, planeIds[i], removeControl);
+            }
         }
 
         public void PredictAircraftsLocation()
         {
-            var futurePlanesLocations = GetFutureAicraftLocations(field.Planes);
-            var futureUmvsLocation = GetFutureAicraftLocations(field.Umvs);
+            var futurePlanesLocations = GetFutureAicraftLocations(field.Aircrafts[AircraftType.Plane]);
+            var futureUmvsLocation = GetFutureAicraftLocations(field.Aircrafts[AircraftType.Umv]);
 
             CheckToManeuver(futureUmvsLocation, futurePlanesLocations);
         }
@@ -249,26 +264,28 @@ namespace FlightTraining.Views
 
         private void CheckToManeuver(Dictionary<int, IThreeDPoint> umvsFutureLocation, Dictionary<int, IThreeDPoint> planesFutureLocations)
         {
+            var umvs = field.Aircrafts[AircraftType.Umv];
+
             foreach (var umvFutureLocation in umvsFutureLocation)
                 foreach (var planeFutureLocations in planesFutureLocations)
                     if (SetHeightToGain_IfConflict(umvFutureLocation, GetRectangleFromPoints(field.GetRestrZonePoints()), planeFutureLocations.Value))
-                        if (field.Umvs[umvFutureLocation.Key].FlightStage == FlightStage.Ordinary)
-                            field.Umvs[umvFutureLocation.Key].ChangeFlightStage(FlightStage.Maneuver);
+                        if (umvs[umvFutureLocation.Key].GetFlightStage() == FlightStage.Ordinary)
+                            umvs[umvFutureLocation.Key].ChangeFlightStage(FlightStage.Maneuver);
                     //else field.Umvs[futureUmvLocation.Key].ChangeFlightStage(FlightStage.Ordinary);
 
         }
 
         private bool SetHeightToGain_IfConflict(KeyValuePair<int, IThreeDPoint> umvFutureLocation, Rectangle restrZone, IThreeDPoint planePoint)
         {
-            var umv = field.Umvs[umvFutureLocation.Key];
+            var umv = field.Aircrafts[AircraftType.Umv][umvFutureLocation.Key];
             if (restrZone.Contains(new Point(umvFutureLocation.Value.X, umvFutureLocation.Value.Y)))
             {
-                umv.SetHeightToGain(ProgramOptions.UmvTrackGainHeight[umv.TrackId]);
+                umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);
                 return true;
             }
-            else if (Convertation.ConvertPixelsToMeters(GetDistanceBetween(umvFutureLocation.Value, planePoint)) < ProgramOptions.ConflictDistance)
+            else if (Convertation.ConvertPixelsToMeters(GetDistanceBetween(umvFutureLocation.Value, planePoint)) < AircraftOptions.ConflictDistance)
             {
-                umv.SetHeightToGain(ProgramOptions.UmvTrackGainHeight[umv.TrackId]);
+                umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);
                 return true;
             }
             return false;

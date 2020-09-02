@@ -21,6 +21,7 @@ namespace FlightTraining.Views
         public readonly static Pen OrdinaryPen = new Pen(Color.Black, 2);
         public readonly static SolidBrush OrdinaryBrush = new SolidBrush(Color.White);
 
+
         private static void DrawTrianglePoint(this Graphics g, int x, int y, SolidBrush brush)
         {
             var coords = new Point[]
@@ -39,8 +40,10 @@ namespace FlightTraining.Views
             var leftTopPoint = points.Where(point => point.Id == 0).ToList()[0];
             var rightBottomPoint = points.Where(point => point.Id == 3).ToList()[0];
 
-            g.DrawRectangle(restrZoneBorderPen, new Rectangle(leftTopPoint.X, leftTopPoint.Y, rightBottomPoint.X - leftTopPoint.X, rightBottomPoint.Y - leftTopPoint.Y));
-            g.FillRectangle(restrZoneBrush, new Rectangle(leftTopPoint.X, leftTopPoint.Y, rightBottomPoint.X - leftTopPoint.X, rightBottomPoint.Y - leftTopPoint.Y));
+            var rectangle = new Rectangle(leftTopPoint.X, leftTopPoint.Y, rightBottomPoint.X - leftTopPoint.X, rightBottomPoint.Y - leftTopPoint.Y);
+
+            g.DrawRectangle(restrZoneBorderPen, rectangle);
+            g.FillRectangle(restrZoneBrush, rectangle);
 
             for (var i = 0; i < points.Count; i++)
             {
@@ -72,26 +75,45 @@ namespace FlightTraining.Views
             }
         }
 
-        public static void DrawPlaneTrajectories(this Graphics g, List<Tuple<Point, Point>> pointsPairs, Pen pen)
+        public static void DrawAircraftTrajectories(this Graphics g, List<Tuple<AircraftType, Point, Point>> pointsPairsSets)
         {
-            for (var i = 0; i < pointsPairs.Count; i++)
-                g.DrawLine(pen, pointsPairs[i].Item1, pointsPairs[i].Item2);
+            for (var i = 0; i < pointsPairsSets.Count; i++)
+            {
+                var pen = PlaneTrajectoryPen;
+                var type = pointsPairsSets[i].Item1;
+
+                if (type == AircraftType.Umv) pen = UmvTrajectoryPen;
+
+                var pointsPair = Tuple.Create(pointsPairsSets[i].Item2, pointsPairsSets[i].Item3);
+                g.DrawLine(pen, pointsPair.Item1, pointsPair.Item2);
+            }
         }
 
-        public static void DrawAircrafts(this Graphics g, Dictionary<int, IAircraft> aircrafts)
+        public static void DrawAircrafts(this Graphics g, Dictionary<AircraftType, Dictionary<int, IAircraft>> aircraftSets)
         {
-            foreach (var aircraft in aircrafts.Values)
-            {
-                g.DrawImage(aircraft.Image, (float)(aircraft.X - aircraft.ImageSize / 2),
-                    (float)(aircraft.Y - aircraft.ImageSize / 2), aircraft.ImageSize,
-                    aircraft.ImageSize);
-            }
+            foreach (var aircrafts in aircraftSets.Values)
+                foreach (var aircraft in aircrafts.Values)
+                    g.DrawImage(aircraft.Image, (float)(aircraft.GetCoords().Item1 - aircraft.ImageSize / 2),
+                        (float)(aircraft.GetCoords().Item2 - aircraft.ImageSize / 2), aircraft.ImageSize,
+                        aircraft.ImageSize);
         }
 
         public static void DrawRoundPoint(this Graphics g, Rectangle rect, Pen pen, SolidBrush brush)
         {
             g.DrawEllipse(pen, rect);
             g.FillEllipse(brush, rect);
+        }
+
+        public static void DrawFuturePoints(this Graphics g, Dictionary<AircraftType, Dictionary<int, IAircraft>> aircraftSets)
+        {
+            foreach (var aircrafts in aircraftSets.Values)
+                foreach (var aircraft in aircrafts.Values)
+                {
+                    var futureLocation = aircraft.GetFutureLocation();
+                    var rect = new Rectangle(futureLocation.X - 5, futureLocation.Y - 5, 10, 10);
+                    if (aircraft.Type == AircraftType.Plane) g.DrawRoundPoint(rect, OrdinaryPen, PlanePointsBrush);
+                    else g.DrawRoundPoint(rect, OrdinaryPen, UmvPointsBrush);
+                }
         }
     }
 }

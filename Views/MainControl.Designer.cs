@@ -33,7 +33,9 @@ namespace FlightTraining.Views
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainControl));
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.fieldControl = new FlightTraining.Views.FieldControl();
             this.topPanel = new System.Windows.Forms.Panel();
+            this.controlPanel = new System.Windows.Forms.TableLayoutPanel();
             this.startButton = new System.Windows.Forms.Button();
             this.someButton = new System.Windows.Forms.Button();
             this.pauseButton = new System.Windows.Forms.Button();
@@ -41,9 +43,10 @@ namespace FlightTraining.Views
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button1 = new System.Windows.Forms.Button();
             this.clockTimer = new System.Windows.Forms.Timer(this.components);
-            this.fieldControl = new FlightTraining.Views.FieldControl();
+            this.graphicTimer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel.SuspendLayout();
             this.topPanel.SuspendLayout();
+            this.controlPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -66,12 +69,20 @@ namespace FlightTraining.Views
             this.tableLayoutPanel.Size = new System.Drawing.Size(1262, 721);
             this.tableLayoutPanel.TabIndex = 0;
             // 
+            // fieldControl
+            // 
+            this.fieldControl.BackColor = System.Drawing.Color.White;
+            this.fieldControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.fieldControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fieldControl.Location = new System.Drawing.Point(63, 72);
+            this.fieldControl.Margin = new System.Windows.Forms.Padding(0);
+            this.fieldControl.Name = "fieldControl";
+            this.fieldControl.Size = new System.Drawing.Size(1135, 612);
+            this.fieldControl.TabIndex = 0;
+            // 
             // topPanel
             // 
-            this.topPanel.Controls.Add(this.startButton);
-            this.topPanel.Controls.Add(this.someButton);
-            this.topPanel.Controls.Add(this.pauseButton);
-            this.topPanel.Controls.Add(this.clock);
+            this.topPanel.Controls.Add(this.controlPanel);
             this.topPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.topPanel.Location = new System.Drawing.Point(63, 0);
             this.topPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -79,27 +90,55 @@ namespace FlightTraining.Views
             this.topPanel.Size = new System.Drawing.Size(1135, 72);
             this.topPanel.TabIndex = 5;
             // 
+            // controlPanel
+            // 
+            this.controlPanel.ColumnCount = 9;
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7F));
+            this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.controlPanel.Controls.Add(this.startButton, 1, 1);
+            this.controlPanel.Controls.Add(this.someButton, 5, 1);
+            this.controlPanel.Controls.Add(this.pauseButton, 3, 1);
+            this.controlPanel.Controls.Add(this.clock, 7, 1);
+            this.controlPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.controlPanel.Location = new System.Drawing.Point(0, 0);
+            this.controlPanel.Name = "controlPanel";
+            this.controlPanel.RowCount = 3;
+            this.controlPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.controlPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.controlPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.controlPanel.Size = new System.Drawing.Size(1135, 72);
+            this.controlPanel.TabIndex = 0;
+            // 
             // startButton
             // 
             this.startButton.BackColor = System.Drawing.Color.LimeGreen;
             this.startButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.startButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.startButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.startButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.startButton.Location = new System.Drawing.Point(85, 10);
+            this.startButton.Location = new System.Drawing.Point(173, 16);
             this.startButton.Name = "startButton";
             this.startButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.startButton.Size = new System.Drawing.Size(121, 37);
+            this.startButton.Size = new System.Drawing.Size(107, 41);
             this.startButton.TabIndex = 2;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = false;
             // 
             // someButton
             // 
+            this.someButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.someButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.someButton.Location = new System.Drawing.Point(498, 10);
+            this.someButton.Location = new System.Drawing.Point(625, 16);
             this.someButton.Name = "someButton";
             this.someButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.someButton.Size = new System.Drawing.Size(133, 37);
+            this.someButton.Size = new System.Drawing.Size(107, 41);
             this.someButton.TabIndex = 4;
             this.someButton.Text = "Something";
             this.someButton.UseVisualStyleBackColor = true;
@@ -107,22 +146,24 @@ namespace FlightTraining.Views
             // pauseButton
             // 
             this.pauseButton.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.pauseButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pauseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.pauseButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.pauseButton.Location = new System.Drawing.Point(294, 10);
+            this.pauseButton.Location = new System.Drawing.Point(399, 16);
             this.pauseButton.Name = "pauseButton";
             this.pauseButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.pauseButton.Size = new System.Drawing.Size(125, 37);
+            this.pauseButton.Size = new System.Drawing.Size(107, 41);
             this.pauseButton.TabIndex = 3;
             this.pauseButton.Text = "Pause";
             this.pauseButton.UseVisualStyleBackColor = false;
             // 
             // clock
             // 
-            this.clock.Font = new System.Drawing.Font("Roboto Slab", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.clock.Location = new System.Drawing.Point(983, 17);
+            this.clock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.clock.Font = new System.Drawing.Font("Roboto Slab", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.clock.Location = new System.Drawing.Point(851, 13);
             this.clock.Name = "clock";
-            this.clock.Size = new System.Drawing.Size(136, 37);
+            this.clock.Size = new System.Drawing.Size(107, 47);
             this.clock.TabIndex = 5;
             this.clock.Text = "00:00:00";
             this.clock.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -150,16 +191,9 @@ namespace FlightTraining.Views
             // 
             this.clockTimer.Interval = 10;
             // 
-            // fieldControl
+            // graphicTimer
             // 
-            this.fieldControl.BackColor = System.Drawing.Color.White;
-            this.fieldControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.fieldControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fieldControl.Location = new System.Drawing.Point(63, 72);
-            this.fieldControl.Margin = new System.Windows.Forms.Padding(0);
-            this.fieldControl.Name = "fieldControl";
-            this.fieldControl.Size = new System.Drawing.Size(1135, 612);
-            this.fieldControl.TabIndex = 0;
+            this.graphicTimer.Interval = ProgramOptions.GraphicTimerInterval;
             // 
             // MainControl
             // 
@@ -170,6 +204,7 @@ namespace FlightTraining.Views
             this.Size = new System.Drawing.Size(1262, 721);
             this.tableLayoutPanel.ResumeLayout(false);
             this.topPanel.ResumeLayout(false);
+            this.controlPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
@@ -187,5 +222,7 @@ namespace FlightTraining.Views
         private System.Windows.Forms.Panel topPanel;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Timer clockTimer;
+        private System.Windows.Forms.Timer graphicTimer;
+        private System.Windows.Forms.TableLayoutPanel controlPanel;
     }
 }
