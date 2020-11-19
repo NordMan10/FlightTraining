@@ -115,7 +115,7 @@ namespace FlightTraining.Views
             model = model_;
             field = new Field(model, Width, Height);
 
-            field.AddPointsLabels(addControl);
+            field.AddLabelsPoints(addControl);
 
             Invalidate();
             configured = true;
@@ -144,23 +144,20 @@ namespace FlightTraining.Views
             e.Graphics.DrawFuturePoints(field.Aircrafts);
         }
 
-        private List<IThreeDPoint> GetAircraftPoints(List<Dictionary<int, IThreeDPoint>> airctaftPoints)
+        private List<Point3D> GetAircraftPoints(List<List<Point3D>> aircraftPoints)
         {
-            var result = new List<IThreeDPoint>();
-            foreach (var points in airctaftPoints)
-                foreach (var point in points.Values)
-                    result.Add(point);
-            return result;
+            return aircraftPoints.SelectMany(points => points).ToList();
         }
 
-        private List<Tuple<AircraftType, Point, Point>> GetTrajectoryPoints(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary< int, int?[][]>>>airflowsTrackSets,
-            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points)
+        private List<Tuple<AircraftType, Point, Point>> GetTrajectoryPoints(Dictionary<AircraftFlow, 
+                Dictionary<AircraftType, Dictionary<int, int?[][]>>>airflowsTrackSets,
+                Dictionary<AircraftType, List<List<Point3D>>> points)
         {
             var result = new List<Tuple<AircraftType, Point, Point>>();
 
             foreach (var airflowTrackSets in airflowsTrackSets)
             {
-                var path = new List<IThreeDPoint>();
+                var path = new List<Point3D>();
                 foreach (var aircraftTrackSet in airflowTrackSets.Value)
                 {
                     var type = aircraftTrackSet.Key;
@@ -175,7 +172,7 @@ namespace FlightTraining.Views
             return result;
         }
 
-        private void FillResult(AircraftType type, ref List<Tuple<AircraftType, Point, Point>> result, List<IThreeDPoint> path)
+        private void FillResult(AircraftType type, ref List<Tuple<AircraftType, Point, Point>> result, List<Point3D> path)
         {
             for (var i = 0; i < path.Count - 1; i++)
             {
@@ -237,9 +234,9 @@ namespace FlightTraining.Views
             CheckToManeuver(futureUmvsLocation, futurePlanesLocations);
         }
 
-        private Dictionary<int, IThreeDPoint> GetFutureAicraftLocations(Dictionary<int, IAircraft> aircrafts)
+        private Dictionary<int, Point3D> GetFutureAicraftLocations(Dictionary<int, IAircraft> aircrafts)
         {
-            var futureAicraftLocations = new Dictionary<int, IThreeDPoint>();
+            var futureAicraftLocations = new Dictionary<int, Point3D>();
             foreach (var aircraft in aircrafts.Values)
                 futureAicraftLocations.Add(aircraft.Id, aircraft.GetFutureLocation());
 
@@ -254,7 +251,7 @@ namespace FlightTraining.Views
         /// <param name="pt2">Вторая точка</param>
         /// <returns></returns>
         /// Возможно придётся рассчитывать и по третьей оси
-        private double GetDistanceBetween(IThreeDPoint pt1, IThreeDPoint pt2)
+        private double GetDistanceBetween(Point3D pt1, Point3D pt2)
         {
             var dx = pt2.X - pt1.X;
             var dy = pt2.Y - pt1.Y;
@@ -262,20 +259,20 @@ namespace FlightTraining.Views
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        private void CheckToManeuver(Dictionary<int, IThreeDPoint> umvsFutureLocation, Dictionary<int, IThreeDPoint> planesFutureLocations)
+        private void CheckToManeuver(Dictionary<int, Point3D> umvsFutureLocation, Dictionary<int, Point3D> planesFutureLocations)
         {
             var umvs = field.Aircrafts[AircraftType.Umv];
 
             foreach (var umvFutureLocation in umvsFutureLocation)
                 foreach (var planeFutureLocations in planesFutureLocations)
-                    if (SetHeightToGain_IfConflict(umvFutureLocation, GetRectangleFromPoints(field.GetRestrZonePoints()), planeFutureLocations.Value))
+                    if (SetHeightToGain_IfConflict(umvFutureLocation, GetRectangleFromPoints(field.GetRestrAreaPoints()), planeFutureLocations.Value))
                         if (umvs[umvFutureLocation.Key].GetFlightStage() == FlightStage.Ordinary)
                             umvs[umvFutureLocation.Key].ChangeFlightStage(FlightStage.Maneuver);
                     //else field.Umvs[futureUmvLocation.Key].ChangeFlightStage(FlightStage.Ordinary);
 
         }
 
-        private bool SetHeightToGain_IfConflict(KeyValuePair<int, IThreeDPoint> umvFutureLocation, Rectangle restrZone, IThreeDPoint planePoint)
+        private bool SetHeightToGain_IfConflict(KeyValuePair<int, Point3D> umvFutureLocation, Rectangle restrZone, Point3D planePoint)
         {
             var umv = field.Aircrafts[AircraftType.Umv][umvFutureLocation.Key];
             if (restrZone.Contains(new Point(umvFutureLocation.Value.X, umvFutureLocation.Value.Y)))
@@ -291,7 +288,7 @@ namespace FlightTraining.Views
             return false;
         }
 
-        private Rectangle GetRectangleFromPoints(List<IThreeDPoint> points)
+        private Rectangle GetRectangleFromPoints(List<Point3D> points)
         {
             return new Rectangle(points[0].X, points[0].Y, points[1].X - points[0].X, points[2].Y - points[0].Y);
         }

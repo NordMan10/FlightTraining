@@ -25,7 +25,7 @@ namespace FlightTraining.Model
         /// Вызывает метод, возвращающий точку, в которой окажется ВС через указанный промежуток времени
         /// </summary>
         /// <returns></returns>
-        IThreeDPoint GetFutureLocation();
+        Point3D GetFutureLocation();
 
         void UpdateLocationAndShifts();
 

@@ -3,24 +3,17 @@ using System.Collections.Generic;
 
 namespace FlightTraining.Model
 {
-    public class AircraftFutureLocationExt
+    public class AircraftFutureLocation
     {
-        public AircraftFutureLocationExt() { }
+        private double x;
+        private double y;
+        private double z;
 
-        private double x = 0;
-        private double y = 0;
-        private double z = 0;
-
-        private Shifts shifts = new Shifts();
-
-        private int tracker = 0;
-
-        private List<IThreeDPoint> path = new List<IThreeDPoint>();
-
+        private readonly Shifts shifts = new Shifts();
+        private int tracker;
+        private List<Point3D> path = new List<Point3D>();
         private Action<int, Shifts> calcAndSetShifts = (tracker, shifts) => throw new NotImplementedException();
-
         private bool isPointInFinish = false;
-
 
         /// <summary>
         /// Возвращает точку, в которой окажется ВС через указанный промежуток времени
@@ -36,10 +29,10 @@ namespace FlightTraining.Model
         /// <param name="calcAndSetShifts_"></param>
         /// <param name="interval"></param>
         /// <returns></returns>
-        public IThreeDPoint GetFutureLocation(double x_, double y_, double z_, double dx, double dy, 
-            double dz, int tracker_, List<IThreeDPoint> path_, Action<int, Shifts> calcAndSetShifts_, int interval)
+        public Point3D GetFutureLocation(double x_, double y_, double z_, double dx, double dy, 
+            double dz, int tracker_, List<Point3D> path_, Action<int, Shifts> calcAndSetShifts_, int interval)
         {
-            if (isPointInFinish) return new ThreeDPoint((int)x, (int)y, (int)z);
+            if (isPointInFinish) return new Point3D((int)x, (int)y, (int)z);
 
             x = x_;
             y = y_;
@@ -50,7 +43,6 @@ namespace FlightTraining.Model
             shifts.Dz = dz;
 
             tracker = tracker_;
-
             path = path_;
 
             calcAndSetShifts = calcAndSetShifts_;
@@ -58,12 +50,12 @@ namespace FlightTraining.Model
             for (var i = 0; i < interval; i++)
             {
                 CheckToChangePath();
-                x += shifts.Dx * ProgramOptions.TimeCoafficient;
-                y += shifts.Dy * ProgramOptions.TimeCoafficient;
-                z += shifts.Dz * ProgramOptions.TimeCoafficient;
+                x += shifts.Dx * ProgramOptions.TimeCoefficient;
+                y += shifts.Dy * ProgramOptions.TimeCoefficient;
+                z += shifts.Dz * ProgramOptions.TimeCoefficient;
             }
 
-            return new ThreeDPoint((int)x, (int)y, (int)z);
+            return new Point3D((int)x, (int)y, (int)z);
         }
 
         private void CheckToChangePath()

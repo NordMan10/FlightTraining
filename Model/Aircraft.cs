@@ -8,11 +8,11 @@ namespace FlightTraining.Model
     public class Aircraft : IAircraft
     {
         public Aircraft(AircraftType type, int id, string name, int velocity, string entryTime,
-            Image image, int imageSize, int trackId_, List<IThreeDPoint> path)
+            Image image, int imageSize, int trackId, List<Point3D> path)
         {
             Type = type;
             Id = id;
-            Name = name.ToUpper() + "_" + entryTime.ToString();
+            Name = name.ToUpper() + "_" + entryTime;
             X = path[0].X;
             Y = path[0].Y;
             Z = path[0].Z;
@@ -23,9 +23,8 @@ namespace FlightTraining.Model
             ImageSize = imageSize;
             Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
             InitInfoForm();
-            Shifts = new Shifts();
             Tracker = 0;
-            TrackId = trackId_;
+            TrackId = trackId;
             Path = path;
             FlightStageChanged += Aircraft_FlightStageChanged;
             ChangeFlightStage(FlightStage.Ordinary);
@@ -37,7 +36,7 @@ namespace FlightTraining.Model
 
         public int TrackId { get; }
 
-        private readonly AircraftFutureLocationExt futureLocation = new AircraftFutureLocationExt();
+        private AircraftFutureLocation FutureLocation { get; } = new AircraftFutureLocation();
 
         public AircraftType Type { get; }
 
@@ -61,14 +60,17 @@ namespace FlightTraining.Model
 
         public int ImageSize { get; }
 
-        public Shifts Shifts { get; private set; }
+        public Shifts Shifts { get; } = new Shifts();
 
         public Label InfoForm { get; private set; }
 
-        public List<IThreeDPoint> Path { get; }
+        public List<Point3D> Path { get; }
 
         public Tuple<Point, Point> OldPointsCoords { get; private set; }
 
+        /// <summary>
+        /// Точка, которую прошло данное ВС
+        /// </summary>
         public int Tracker { get; private set; }
 
         public FlightStage FlightStage { get; private set; }
@@ -93,7 +95,7 @@ namespace FlightTraining.Model
         }
 
         /// <summary>
-        /// Изменяет метод для расчёта смещений в делегате. Относится к обработчику события изменения стадии полёта
+        /// Изменяет метод в делегате для расчёта смещений. Относится к обработчику события изменения стадии полёта
         /// </summary>
         /// <param name="action">Метод для расчёта смещений</param>
         private void ChangeAndInvoke_Shifts(Action<int, Shifts> action, int tracker_, Shifts shifts_ = null)
@@ -170,29 +172,33 @@ namespace FlightTraining.Model
 
         private void CalcAndSetShifts_Ordinary(int tracker, Shifts shifts = null)
         {
-            var directShift = GetDirectShift();
-            var hypotenuseV = directShift / Math.Cos(Path[tracker].ShiftsData[TrackId][1]);
+            var shiftXY = GetShiftXY();
+            var shiftZ = shiftXY / Math.Cos(Path[tracker].ShiftsData[TrackId][1]);
 
-            SetShifts(shifts, directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
-                directShift * Math.Sin(Path[tracker].ShiftsData[TrackId][0]),
-                hypotenuseV * Math.Sin(Path[tracker].ShiftsData[TrackId][1]));
+            SetShifts(shifts, 
+                shiftXY * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
+                shiftXY * Math.Sin(Path[tracker].ShiftsData[TrackId][0]),
+                shiftZ * Math.Sin(Path[tracker].ShiftsData[TrackId][1]));
         }
 
         private void CalcAndSetShifts_Maneuver(int tracker, Shifts shifts = null)
         {
-            var directShift = GetDirectShift();
+            var directShift = GetShiftXY();
 
-            SetShifts(shifts, directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
+            SetShifts(shifts, 
+                directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
                 directShift * Math.Sin(Path[tracker].ShiftsData[TrackId][0]),
                 GetHeightManeuverShift(HeightToGain, AircraftOptions.TimeToGainHeight));
         }
 
         private void CalcAndSetShifts_HeightHold(int tracker, Shifts shifts = null)
         {
-            var directShift = GetDirectShift();
+            var directShift = GetShiftXY();
 
-            SetShifts(shifts, directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
-                 directShift * Math.Sin(Path[tracker].ShiftsData[TrackId][0]), 0);
+            SetShifts(shifts, 
+                directShift * Math.Cos(Path[tracker].ShiftsData[TrackId][0]),
+                directShift * Math.Sin(Path[tracker].ShiftsData[TrackId][0]), 
+                0);
         }
 
         private void SetShifts(Shifts shifts, double dx, double dy, double dz)
@@ -222,27 +228,30 @@ namespace FlightTraining.Model
         private double GetHeightManeuverShift(int height, int time)
         {
             var dh = height - Z;
-            return dh / time / ProgramOptions.TimeCoafficient;
+            return dh / time / ProgramOptions.TimeCoefficient;
         }
 
         /// <summary>
-        /// Возвращает расстояние в пикселях, проходимое ВС в любую сторону за 1 с
+        /// Возвращает расстояние в пикселях, проходимое ВС в плоскости XY за 1 с
         /// </summary>
         /// <returns></returns>
-        private double GetDirectShift()
+        private double GetShiftXY()
         {
-            return Velocity / ProgramOptions.TimeCoafficient / ProgramOptions.MetersInCell * ProgramOptions.PixelsInCell;
+            return Velocity / ProgramOptions.TimeCoefficient / ProgramOptions.MetersInCell * ProgramOptions.PixelsInCell;
         }
 
         public void UpdateLocationAndShifts()
         {
-            X = UpdateCoordinate(X, Path[Tracker + 1].X, Path[Tracker].X, OldPointsCoords.Item2.X, OldPointsCoords.Item1.X);
-            Y = UpdateCoordinate(Y, Path[Tracker + 1].Y, Path[Tracker].Y, OldPointsCoords.Item2.Y, OldPointsCoords.Item1.Y);
+            X = UpdateCoordinate(X, Path[Tracker + 1].X, Path[Tracker].X,
+                OldPointsCoords.Item2.X, OldPointsCoords.Item1.X);
+            Y = UpdateCoordinate(Y, Path[Tracker + 1].Y, Path[Tracker].Y, 
+                OldPointsCoords.Item2.Y, OldPointsCoords.Item1.Y);
 
             Invoke_CalculationShifts(Tracker);
         }
 
-        private double UpdateCoordinate(double coord, int newFinishPointCoord, int newStartPointCoord, int oldFinishPointCoord, int oldStartPointCoord)
+        private double UpdateCoordinate(double coord, int newFinishPointCoord, 
+            int newStartPointCoord, int oldFinishPointCoord, int oldStartPointCoord)
         {
             var ratio = (double)Math.Abs(newFinishPointCoord - newStartPointCoord) / Math.Abs(oldFinishPointCoord - oldStartPointCoord);
             if (Math.Abs(oldFinishPointCoord - oldStartPointCoord) == 0)
@@ -264,9 +273,9 @@ namespace FlightTraining.Model
             FlightStageChanged.Invoke(stage);
         }
 
-        public IThreeDPoint GetFutureLocation()
+        public Point3D GetFutureLocation()
         {
-            return futureLocation.GetFutureLocation(X, Y, Z, Shifts.Dx, Shifts.Dy, Shifts.Dz, 
+            return FutureLocation.GetFutureLocation(X, Y, Z, Shifts.Dx, Shifts.Dy, Shifts.Dz, 
                 Tracker, Path, CalcAndSetShifts, AircraftOptions.PredictInterval);
         }
 

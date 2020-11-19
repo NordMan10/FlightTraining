@@ -35,7 +35,7 @@ namespace FlightTraining.Views
             g.FillPolygon(brush, coords);
         }
 
-        public static void DrawRestrZone(this Graphics g, List<IThreeDPoint> points)
+        public static void DrawRestrZone(this Graphics g, List<Point3D> points)
         {
             var leftTopPoint = points.Where(point => point.Id == 0).ToList()[0];
             var rightBottomPoint = points.Where(point => point.Id == 3).ToList()[0];
@@ -67,7 +67,7 @@ namespace FlightTraining.Views
             }
         }
 
-        public static void DrawAircraftPoints(this Graphics g, List<IThreeDPoint> points, SolidBrush brush)
+        public static void DrawAircraftPoints(this Graphics g, List<Point3D> points, SolidBrush brush)
         {
             for (var i = 0; i < points.Count; i++)
             {

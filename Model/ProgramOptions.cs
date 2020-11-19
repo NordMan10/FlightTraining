@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace FlightTraining.Model
 {
@@ -16,13 +14,13 @@ namespace FlightTraining.Model
 
         public static readonly int GraphicTimerInterval = 250;
 
-        public static readonly int ClockTimerInterval = 10;
+        //public static readonly int ClockTimerInterval = 10;
 
         public static readonly int RectPointDiameter = 8;
 
         public static readonly int XShiftForConvertation = 1000;
 
-        public static readonly double TimeCoafficient = 1000 / GraphicTimerInterval;
+        public static readonly double TimeCoefficient = 1000 / GraphicTimerInterval;
 
         public static int PixelsInCell = 0;
 

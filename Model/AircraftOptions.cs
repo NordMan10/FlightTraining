@@ -15,9 +15,9 @@ namespace FlightTraining.Model
                     {
                         AircraftType.Plane, new Dictionary<int, int?[][]>()
                         {
-                            { 0, new int?[][] { new int?[] { 0 }, new int?[] { 0 } } },
-                            { 1, new int?[][] { new int?[] { 2 }, new int?[] { 0 } } },
-                            { 2, new int?[][] { new int?[] { 3 }, new int?[] { 0 } } },
+                            { 0, new[] { new int?[] { 0 }, new int?[] { 0 } } },
+                            { 1, new[] { new int?[] { 2 }, new int?[] { 0 } } },
+                            { 2, new[] { new int?[] { 3 }, new int?[] { 0 } } }
                         }
                     }
                 }
@@ -28,9 +28,9 @@ namespace FlightTraining.Model
                     {
                         AircraftType.Plane, new Dictionary<int, int?[][]>()
                         {
-                            { 0, new int?[][] { new int?[] { 1 }, new int?[] { 1 } } },
-                            { 1, new int?[][] { new int?[] { 1 }, new int?[] { 2 } } },
-                            { 2, new int?[][] { new int?[] { 1 }, new int?[] { 3 } } }
+                            { 0, new[] { new int?[] { 1 }, new int?[] { 1 } } },
+                            { 1, new[] { new int?[] { 1 }, new int?[] { 2 } } },
+                            { 2, new[] { new int?[] { 1 }, new int?[] { 3 } } }
                         }
                     }
                 }
@@ -41,9 +41,9 @@ namespace FlightTraining.Model
                     {
                         AircraftType.Umv, new Dictionary<int, int?[][]>()
                         {
-                            { 0, new int?[][] { new int?[] { 0 }, null, new int?[] { 0 } } },
-                            { 1, new int?[][] { new int?[] { 0 }, new int?[] { 0 }, new int?[] { 0 } } },
-                            { 2, new int?[][] { new int?[] { 0 }, new int?[] { 0, 1 }, new int?[] { 1 } } }
+                            { 0, new[] { new int?[] { 0 }, null, new int?[] { 0 } } },
+                            { 1, new[] { new int?[] { 0 }, new int?[] { 0 }, new int?[] { 0 } } },
+                            { 2, new[] { new int?[] { 0 }, new int?[] { 0, 1 }, new int?[] { 1 } } }
                         }
                     }
                 }

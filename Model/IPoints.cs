@@ -10,16 +10,9 @@ namespace FlightTraining.Model
     public interface IPoints
     {
         Dictionary<LayoutPointsType, List<Tuple<Point, Point>>> LayoutPoints { get; }
-
-        Dictionary<AreaPointsType, List<IThreeDPoint>> AreaPoints { get; }
-
-        Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> AircraftsPoints { get; }
-
+        Dictionary<AreaPointsType, List<Point3D>> AreaPoints { get; }
+        Dictionary<AircraftType, List<List<Point3D>>> AircraftsPoints { get; }
+        Dictionary<NavigationPointsType, List<Point3D>> NavigationPoints { get; }
         void UpdateAllPointsCoords();
-
-        Label SetLabel(Point location, string text);
-
-        void CreatePointsLabels(Dictionary<IThreeDPoint, Label> pointsLabels);
-
     }
 }

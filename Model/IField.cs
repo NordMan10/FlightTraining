@@ -15,7 +15,7 @@ namespace FlightTraining.Model
 
         Dictionary<AircraftType, Dictionary<int, IAircraft>> Aircrafts { get; }
 
-        Dictionary<IThreeDPoint, Label> PointsLabels { get; }
+        Dictionary<Point3D, Label> LabelsPoints { get; }
 
         void AddAircraft(AircraftType type, AircraftFlow flow, int trackId, Action<Control> addControl);
 
@@ -25,12 +25,12 @@ namespace FlightTraining.Model
 
         void CreatePaths();
 
-        List<IThreeDPoint> GetRestrZonePoints();
+        List<Point3D> GetRestrAreaPoints();
 
-        List<IThreeDPoint> GetPath(AircraftType type, KeyValuePair<int, int?[][]> trackSet,
-            Dictionary<AircraftType, List<Dictionary<int, IThreeDPoint>>> points);
+        List<Point3D> GetPath(AircraftType type, KeyValuePair<int, int?[][]> trackSets,
+            Dictionary<AircraftType, List<List<Point3D>>> points);
 
-        void AddPointsLabels(Action<Control> addControl);
+        void AddLabelsPoints(Action<Control> addControl);
 
         void UpdateLabelsLocation();
 

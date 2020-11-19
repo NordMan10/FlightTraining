@@ -13,7 +13,7 @@ namespace FlightTraining.Model
         /// с переносом направления осей и ковертацией метров в пиксели.
         /// </summary>
         /// <returns></returns>
-        public static Tuple<int, int, int> ConvertFromSchemeToProgram(int x, int y, int z)
+        public static Tuple<int, int, int> TransformCoordsFromSchemeToProgram(int x, int y, int z)
         {
             return Tuple.Create(ConvertMetersToPixels(z + ProgramOptions.XShiftForConvertation),
                 ConvertMetersToPixels(ProgramOptions.TopFieldBorder - x), y);
