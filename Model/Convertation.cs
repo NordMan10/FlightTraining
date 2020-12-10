@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlightTraining.Model
 {
@@ -28,10 +24,5 @@ namespace FlightTraining.Model
         {
             return (int)(pixels / ProgramOptions.PixelsInCell * ProgramOptions.MetersInCell);
         }
-
-        //public static Tuple<int, int, int> ConvertFromProgramToScheme(int x, int y, int z)
-        //{
-        //    return Tuple.Create(ConvertPixelsToMeters(y), z, ConvertPixelsToMeters(x));
-        //}
     }
 }

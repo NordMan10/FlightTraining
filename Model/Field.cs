@@ -16,7 +16,7 @@ namespace FlightTraining.Model
             this.model = model;
             Width = width;
             Height = height;
-            ProgramOptions.PixelsInCell = width / ProgramOptions.CellsInHorizontal;
+            ProgramOptions.PixelsInCell = GetPixelsInCell(width, height);
             Points = new Points(this);
 
             Aircrafts = new Dictionary<AircraftType, Dictionary<int, IAircraft>>
@@ -45,7 +45,8 @@ namespace FlightTraining.Model
 
         public int Height { get; private set; }
 
-        public Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, List<Point3D>>>> AircraftPaths { get; private set; }
+        public Dictionary<AircraftFlow, Dictionary<AircraftType, 
+            Dictionary<int, List<Point3D>>>> AircraftPaths { get; private set; }
 
 
         public void AddAircraft(AircraftType type, AircraftFlow flow, int trackId, Action<Control> addControl)
@@ -84,8 +85,8 @@ namespace FlightTraining.Model
             CalcShiftData(AircraftPaths);
         }
 
-        private void CreatePath(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, int?[][]>>> airflowsTrackSets, 
-            Dictionary<AircraftType, List<List<Point3D>>> points)
+        private void CreatePath(Dictionary<AircraftFlow, Dictionary<AircraftType, 
+            Dictionary<int, int?[][]>>> airflowsTrackSets, Dictionary<AircraftType, List<List<Point3D>>> points)
         {
             foreach (var airflowTrackSets in airflowsTrackSets)
             {
@@ -125,7 +126,8 @@ namespace FlightTraining.Model
             return path;
         }
 
-        private void CalcShiftData(Dictionary<AircraftFlow, Dictionary<AircraftType, Dictionary<int, List<Point3D>>>> aircraftsFlows)
+        private void CalcShiftData(Dictionary<AircraftFlow, Dictionary<AircraftType, 
+            Dictionary<int, List<Point3D>>>> aircraftsFlows)
         {
             foreach (var aircraftsFlow in aircraftsFlows.Values)
             foreach (var paths in aircraftsFlow.Values)
@@ -159,11 +161,17 @@ namespace FlightTraining.Model
             Width = newWidth;
             Height = newHeight;
 
-            ProgramOptions.PixelsInCell = Math.Min(Width / ProgramOptions.CellsInHorizontal, Height / ProgramOptions.CellsInVertical);
+            ProgramOptions.PixelsInCell = GetPixelsInCell(newWidth, newHeight);
 
             SaveOldAircraftPaths();
             Points.UpdateAllPointsCoords();
             UpdateAircraftLocAndShifts();
+        }
+
+        private int GetPixelsInCell(int width, int height)
+        {
+            return Math.Min(width / ProgramOptions.CellsInHorizontal, 
+                height / ProgramOptions.CellsInVertical);
         }
 
         private void SaveOldAircraftPaths()

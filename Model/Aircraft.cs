@@ -19,9 +19,7 @@ namespace FlightTraining.Model
             Velocity = velocity;
             HeightToGain = 0;
             EntryTime = entryTime;
-            Image = image;
-            ImageSize = imageSize;
-            Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            InitImage(image, imageSize);
             InitInfoForm();
             Tracker = 0;
             TrackId = trackId;
@@ -30,7 +28,8 @@ namespace FlightTraining.Model
             ChangeFlightStage(FlightStage.Ordinary);
         }
 
-        private Action<int, Shifts> CalcAndSetShifts = (tracker, shifts) => throw new NotImplementedException();
+        private Action<int, Shifts> CalcAndSetShifts = (tracker, shifts) => 
+            throw new NotImplementedException();
 
         private event Action<FlightStage> FlightStageChanged;
 
@@ -56,9 +55,9 @@ namespace FlightTraining.Model
 
         public string EntryTime { get; }
 
-        public Image Image { get; }
+        public Image Image { get; private set; }
 
-        public int ImageSize { get; }
+        public int ImageSize { get; private set; }
 
         public Shifts Shifts { get; } = new Shifts();
 
@@ -92,6 +91,13 @@ namespace FlightTraining.Model
                 default:
                     break;
             }
+        }
+
+        private void InitImage(Image image, int imageSize)
+        {
+            Image = image;
+            ImageSize = imageSize;
+            Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
         }
 
         /// <summary>
@@ -237,7 +243,8 @@ namespace FlightTraining.Model
         /// <returns></returns>
         private double GetShiftXY()
         {
-            return Velocity / ProgramOptions.TimeCoefficient / ProgramOptions.MetersInCell * ProgramOptions.PixelsInCell;
+            return Velocity / ProgramOptions.TimeCoefficient / 
+                ProgramOptions.MetersInCell * ProgramOptions.PixelsInCell;
         }
 
         public void UpdateLocationAndShifts()
@@ -253,7 +260,9 @@ namespace FlightTraining.Model
         private double UpdateCoordinate(double coord, int newFinishPointCoord, 
             int newStartPointCoord, int oldFinishPointCoord, int oldStartPointCoord)
         {
-            var ratio = (double)Math.Abs(newFinishPointCoord - newStartPointCoord) / Math.Abs(oldFinishPointCoord - oldStartPointCoord);
+            var ratio = (double)Math.Abs(newFinishPointCoord - newStartPointCoord) / 
+                Math.Abs(oldFinishPointCoord - oldStartPointCoord);
+
             if (Math.Abs(oldFinishPointCoord - oldStartPointCoord) == 0)
             {
                 ratio = newStartPointCoord - oldStartPointCoord;
@@ -264,7 +273,8 @@ namespace FlightTraining.Model
 
         public void SaveOldPath()
         {
-            OldPointsCoords = Tuple.Create(new Point(Path[Tracker].X, Path[Tracker].Y), new Point(Path[Tracker + 1].X, Path[Tracker + 1].Y));
+            OldPointsCoords = Tuple.Create(new Point(Path[Tracker].X, Path[Tracker].Y), 
+                new Point(Path[Tracker + 1].X, Path[Tracker + 1].Y));
         }
 
         public void ChangeFlightStage(FlightStage stage)

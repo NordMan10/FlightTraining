@@ -40,6 +40,8 @@ namespace FlightTraining.Views
 
         public Timer UmvTimer { get; private set; }
 
+        #region Timers
+
         private void InitTimers()
         {
             ArrivePlaneTimer = new Timer();
@@ -85,8 +87,11 @@ namespace FlightTraining.Views
 
         private int GetRandomTimerInterval()
         {
-            return ProgramOptions.Random.Next(AircraftOptions.AircraftInterval.Item1, AircraftOptions.AircraftInterval.Item2);
+            return ProgramOptions.Random.Next(AircraftOptions.AircraftInterval.Item1, 
+                AircraftOptions.AircraftInterval.Item2);
         }
+
+        #endregion 
 
         public void AddFirstAircrafts()
         {
@@ -127,10 +132,12 @@ namespace FlightTraining.Views
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            e.Graphics.DrawLayout(field.Points.LayoutPoints[LayoutPointsType.XAxis], field.Points.LayoutPoints[LayoutPointsType.YAxis]);
+            e.Graphics.DrawLayout(field.Points.LayoutPoints[LayoutPointsType.XAxis], 
+                field.Points.LayoutPoints[LayoutPointsType.YAxis]);
             e.Graphics.DrawRestrZone(field.Points.AreaPoints[AreaPointsType.RestrictedArea]);
             
-            var aircraftTrajectories = GetTrajectoryPoints(AircraftOptions.AircraftsTracks, field.Points.AircraftsPoints);
+            var aircraftTrajectories = GetTrajectoryPoints(AircraftOptions.AircraftsTracks, 
+                field.Points.AircraftsPoints);
             e.Graphics.DrawAircraftTrajectories(aircraftTrajectories);
             
             var planePoints = GetAircraftPoints(field.Points.AircraftsPoints[AircraftType.Plane]);
@@ -172,11 +179,13 @@ namespace FlightTraining.Views
             return result;
         }
 
-        private void FillResult(AircraftType type, ref List<Tuple<AircraftType, Point, Point>> result, List<Point3D> path)
+        private void FillResult(AircraftType type, 
+            ref List<Tuple<AircraftType, Point, Point>> result, List<Point3D> path)
         {
             for (var i = 0; i < path.Count - 1; i++)
             {
-                result.Add(Tuple.Create(type, new Point(path[i].X, path[i].Y), new Point(path[i + 1].X, path[i + 1].Y)));
+                result.Add(Tuple.Create(type, 
+                    new Point(path[i].X, path[i].Y), new Point(path[i + 1].X, path[i + 1].Y)));
             }
         }
 
@@ -195,14 +204,15 @@ namespace FlightTraining.Views
         }
 
         /// <summary>
-        /// Меняет координаты всех ВС на соответствующие смещения. ВС в свою очередь меняют координаты своих формуляров.
+        /// Меняет координаты всех ВС на соответствующие смещения. ВС в свою 
+        /// очередь меняют координаты своих формуляров.
         /// </summary>
         public void MoveAllAircrafts()
         {
-            UpdateAircrafts(field.Aircrafts);
+            UpdateAircrafts();
         }
 
-        private void UpdateAircrafts(Dictionary<AircraftType, Dictionary<int, IAircraft>> aircraftSets)
+        private void UpdateAircrafts()
         {
             var aircraftToRemove = new List<IAircraft>();
             foreach (var aircrafts in field.Aircrafts.Values)
@@ -243,7 +253,6 @@ namespace FlightTraining.Views
             return futureAicraftLocations;
         }
 
-
         /// <summary>
         /// Возвращает дистанцию в пикселях между двумя точками на плоскости
         /// </summary>
@@ -259,20 +268,21 @@ namespace FlightTraining.Views
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
-        private void CheckToManeuver(Dictionary<int, Point3D> umvsFutureLocation, Dictionary<int, Point3D> planesFutureLocations)
+        private void CheckToManeuver(Dictionary<int, Point3D> umvsFutureLocation, 
+            Dictionary<int, Point3D> planesFutureLocations)
         {
             var umvs = field.Aircrafts[AircraftType.Umv];
 
             foreach (var umvFutureLocation in umvsFutureLocation)
                 foreach (var planeFutureLocations in planesFutureLocations)
-                    if (SetHeightToGain_IfConflict(umvFutureLocation, GetRectangleFromPoints(field.GetRestrAreaPoints()), planeFutureLocations.Value))
+                    if (SetHeightToGain_IfConflict(umvFutureLocation, 
+                        GetRectangleFromPoints(field.GetRestrAreaPoints()), planeFutureLocations.Value))
                         if (umvs[umvFutureLocation.Key].GetFlightStage() == FlightStage.Ordinary)
                             umvs[umvFutureLocation.Key].ChangeFlightStage(FlightStage.Maneuver);
-                    //else field.Umvs[futureUmvLocation.Key].ChangeFlightStage(FlightStage.Ordinary);
-
         }
 
-        private bool SetHeightToGain_IfConflict(KeyValuePair<int, Point3D> umvFutureLocation, Rectangle restrZone, Point3D planePoint)
+        private bool SetHeightToGain_IfConflict(KeyValuePair<int, Point3D> umvFutureLocation, 
+            Rectangle restrZone, Point3D planePoint)
         {
             var umv = field.Aircrafts[AircraftType.Umv][umvFutureLocation.Key];
             if (restrZone.Contains(new Point(umvFutureLocation.Value.X, umvFutureLocation.Value.Y)))
@@ -280,7 +290,8 @@ namespace FlightTraining.Views
                 umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);
                 return true;
             }
-            else if (Convertation.ConvertPixelsToMeters(GetDistanceBetween(umvFutureLocation.Value, planePoint)) < AircraftOptions.ConflictDistance)
+            else if (Convertation.ConvertPixelsToMeters(
+                GetDistanceBetween(umvFutureLocation.Value, planePoint)) < AircraftOptions.ConflictDistance)
             {
                 umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);
                 return true;
@@ -290,7 +301,8 @@ namespace FlightTraining.Views
 
         private Rectangle GetRectangleFromPoints(List<Point3D> points)
         {
-            return new Rectangle(points[0].X, points[0].Y, points[1].X - points[0].X, points[2].Y - points[0].Y);
+            return new Rectangle(points[0].X, points[0].Y, 
+                points[1].X - points[0].X, points[2].Y - points[0].Y);
         }
     }
 }

@@ -10,6 +10,49 @@ namespace FlightTraining.Model
     {
         private readonly IField field;
 
+        private static Dictionary<NavigationPointsType, List<Point3D>> PrimaryCoords =
+            new Dictionary<NavigationPointsType, List<Point3D>>
+            {
+                {
+                    NavigationPointsType.StartPlanePoints, new List<Point3D>
+                    {
+                        new Point3D(0, 800, 0),
+                        new Point3D(0, 10, 13000),
+                        new Point3D(3000, 800, 0),
+                        new Point3D(-3000, 800, 0),
+                    }
+                },
+                {
+                    NavigationPointsType.StartUmvPoints, new List<Point3D>
+                    {
+                        new Point3D(5000, 800, 7000)
+                    }
+                },
+                {
+                    NavigationPointsType.FinishPlanePoints, new List<Point3D>
+                    {
+                        new Point3D(0, 10, 8000),
+                        new Point3D(3000, 800, 22000),
+                        new Point3D(0, 800, 22000),
+                        new Point3D(-3000, 800, 22000),
+                    }
+                },
+                {
+                    NavigationPointsType.FinishUmvPoints, new List<Point3D>
+                    {
+                        new Point3D(-4000, 800, 3000),
+                        new Point3D(-4000, 800, 14000)
+                    }
+                },
+                {
+                    NavigationPointsType.IntermediateUmvPoints, new List<Point3D>
+                    {
+                        new Point3D(3000, 800, 14000),
+                        new Point3D(2000, 800, 20000)
+                    }
+                },
+            };
+
         public Points(IField field)
         {
             this.field = field;
@@ -41,10 +84,10 @@ namespace FlightTraining.Model
                 {LayoutPointsType.YAxis, new List<Tuple<Point, Point>>()}
             };
 
-            SetLayoutCoords();
+            SetLayoutPoints();
         }
 
-        private void SetLayoutCoords()
+        private void SetLayoutPoints()
         {
             LayoutPoints[LayoutPointsType.XAxis].Clear();
 
@@ -91,85 +134,35 @@ namespace FlightTraining.Model
         }
 
         /// <summary>
-        /// Координаты записываем в таком порядке: x, y, z. То есть по схеме: сначала вертикаль, потом высота и потом горизонталь
+        /// Координаты записываем в таком порядке: x, y, z. То есть по схеме: сначала вертикаль, 
+        /// потом высота и потом горизонталь
         /// </summary>
         /// <param name="isUpdate"></param>
         private void InitNavigationPoints(bool isUpdate)
         {
             if (!isUpdate)
-                NavigationPoints = new Dictionary<NavigationPointsType, List<Point3D>>
+            {
+                NavigationPoints = new Dictionary<NavigationPointsType, List<Point3D>>();
+                foreach (var group in PrimaryCoords)
                 {
-                    {
-                        NavigationPointsType.StartPlanePoints,
-                        new List<Point3D> {new Point3D(0), new Point3D(1), new Point3D(2), new Point3D(3)}
-                    },
-                    {
-                        NavigationPointsType.StartUmvPoints,
-                        new List<Point3D>
-                        {
-                            new Point3D(0)
-                        }
-                    },
-                    {
-                        NavigationPointsType.FinishPlanePoints,
-                        new List<Point3D>
-                        {
-                            new Point3D(0),
-                            new Point3D(1),
-                            new Point3D(2),
-                            new Point3D(3)
+                    var initSet = new List<Point3D>();
+                    for (var i = 0; i < group.Value.Count; i++)
+                        initSet.Add(new Point3D(i));
+                    NavigationPoints.Add(group.Key, initSet);
+                }
+            }
 
-                        }
-                    },
-                    {
-                        NavigationPointsType.FinishUmvPoints,
-                        new List<Point3D>
-                        {
-                            new Point3D(0),
-                            new Point3D(1)
-                        }
-                    },
-                    {
-                        NavigationPointsType.IntermediateUmvPoints,
-                        new List<Point3D>
-                        {
-                            new Point3D(0),
-                            new Point3D(1)
+            foreach (var coords in PrimaryCoords)
+                UpdateNavPointsData(coords.Key, coords.Value);
+        }
 
-                        }
-                    },
-                };
-
-            NavigationPoints[NavigationPointsType.StartPlanePoints][0]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(0, 800, 0));
-            NavigationPoints[NavigationPointsType.StartPlanePoints][1]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(0, 10, 13000));
-            NavigationPoints[NavigationPointsType.StartPlanePoints][2]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(3000, 800, 0));
-            NavigationPoints[NavigationPointsType.StartPlanePoints][3]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(-3000, 800, 0));
-
-            NavigationPoints[NavigationPointsType.StartUmvPoints][0]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(5000, 800, 7000));
-
-            NavigationPoints[NavigationPointsType.FinishPlanePoints][0]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(0, 10, 8000));
-            NavigationPoints[NavigationPointsType.FinishPlanePoints][1]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(3000, 800, 22000));
-            NavigationPoints[NavigationPointsType.FinishPlanePoints][2]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(0, 800, 22000));
-            NavigationPoints[NavigationPointsType.FinishPlanePoints][3]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(-3000, 800, 22000));
-
-            NavigationPoints[NavigationPointsType.FinishUmvPoints][0]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(-4000, 800, 3000));
-            NavigationPoints[NavigationPointsType.FinishUmvPoints][1]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(-4000, 800, 14000));
-
-            NavigationPoints[NavigationPointsType.IntermediateUmvPoints][0]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(3000, 800, 14000));
-            NavigationPoints[NavigationPointsType.IntermediateUmvPoints][1]
-                .UpdateCoords(Convertation.TransformCoordsFromSchemeToProgram(2000, 800, 20000));
+        private void UpdateNavPointsData(NavigationPointsType type, List<Point3D> coords)
+        {
+            for (var i = 0; i < coords.Count; i++)
+            {
+                NavigationPoints[type][i].UpdateCoords(Convertation.
+                    TransformCoordsFromSchemeToProgram(coords[i].X, coords[i].Y, coords[i].Z));
+            }
         }
 
         private void InitAircraftsPoints()

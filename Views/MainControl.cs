@@ -37,7 +37,8 @@ namespace FlightTraining.Views
         private void ClockTimer_Tick(object sender, EventArgs e)
         {
             var elapsedTime = model.GetStopwatchElapsedTime();
-            clock.Text = string.Format("{0:00}:{1:00}:{2:00}", elapsedTime.Minutes, elapsedTime.Seconds, elapsedTime.Milliseconds / 10);
+            clock.Text = string.Format("{0:00}:{1:00}:{2:00}", 
+                elapsedTime.Minutes, elapsedTime.Seconds, elapsedTime.Milliseconds / 10);
         }
 
         private void GraphicTimer_Tick(object sender, EventArgs e) 

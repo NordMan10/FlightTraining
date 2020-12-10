@@ -1,0 +1,13 @@
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.csprojAssemblyReference.cache
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.Properties.Resources.resources
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.csproj.GenerateResource.cache
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.csproj.CoreCompileInputs.cache
+D:\Programming\C# Programs\FlightTraining\bin\Debug\FlightTraining.exe.config
+D:\Programming\C# Programs\FlightTraining\bin\Debug\FlightTraining.exe
+D:\Programming\C# Programs\FlightTraining\bin\Debug\FlightTraining.pdb
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.exe
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.pdb
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.Views.FieldControl.resources
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.Views.MainControl.resources
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.MainForm.resources
+D:\Programming\C# Programs\FlightTraining\obj\Debug\FlightTraining.Views.StartControl.resources

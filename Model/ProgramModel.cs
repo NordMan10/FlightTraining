@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 
 namespace FlightTraining.Model
 {
@@ -55,11 +54,5 @@ namespace FlightTraining.Model
         {
             return Stopwatch.Elapsed;
         }
-
-        //void SetGraphicTimer_TickEvent(event Action action)
-        //{
-        //    GraphicTimer += action;
-        //}
-
     }
 }
