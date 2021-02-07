@@ -86,7 +86,7 @@ namespace FlightTraining.Model
         }
 
         private void CreatePath(Dictionary<AircraftFlow, Dictionary<AircraftType, 
-            Dictionary<int, int?[][]>>> airflowsTrackSets, Dictionary<AircraftType, List<List<Point3D>>> points)
+            Dictionary<int, int?[][]>>> airflowsTrackSets, Dictionary<AircraftType, List<List<Point3D>>> aircraftPoints)
         {
             foreach (var airflowTrackSets in airflowsTrackSets)
             {
@@ -96,7 +96,7 @@ namespace FlightTraining.Model
                     var paths = new Dictionary<int, List<Point3D>>();
                     foreach (var trackSet in aircraftTrackSets.Value)
                     {
-                        var path = GetPath(aircraftTrackSets.Key, trackSet, points);
+                        var path = GetPath(aircraftTrackSets.Key, trackSet, aircraftPoints);
                         paths.Add(trackSet.Key, path);
                     }
                     aircraftTypePaths.Add(aircraftTrackSets.Key, paths);

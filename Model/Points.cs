@@ -167,7 +167,7 @@ namespace FlightTraining.Model
 
         private void InitAircraftsPoints()
         {
-            var planePoints = new List<List<Point3D>>();
+            var planePoints = new List<List<Point3D>>();    
             planePoints.Add(NavigationPoints[NavigationPointsType.StartPlanePoints]);
             planePoints.Add(NavigationPoints[NavigationPointsType.FinishPlanePoints]);
 

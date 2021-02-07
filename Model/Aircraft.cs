@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace FlightTraining.Model
@@ -13,6 +14,7 @@ namespace FlightTraining.Model
             Type = type;
             Id = id;
             Name = name.ToUpper() + "_" + entryTime;
+            //Location = new Point3D(path[0].X, path[0].Y, path[0].Z);
             X = path[0].X;
             Y = path[0].Y;
             Z = path[0].Z;
@@ -42,6 +44,7 @@ namespace FlightTraining.Model
         public int Id { get; }
 
         public string Name { get; }
+        //public Point3D Location { get; private set; }
 
         public double X { get; private set; }
 
@@ -101,7 +104,8 @@ namespace FlightTraining.Model
         }
 
         /// <summary>
-        /// Изменяет метод в делегате для расчёта смещений. Относится к обработчику события изменения стадии полёта
+        /// Изменяет метод в делегате для расчёта смещений. Относится к обработчику 
+        /// события изменения стадии полёта
         /// </summary>
         /// <param name="action">Метод для расчёта смещений</param>
         private void ChangeAndInvoke_Shifts(Action<int, Shifts> action, int tracker_, Shifts shifts_ = null)
@@ -130,6 +134,8 @@ namespace FlightTraining.Model
         {
             CheckToHeightHold();
 
+            //Location.UpdateCoords(Tuple.Create(Location.X + Shifts.Dx, Location.Y + Shifts.Dy, Location.Z + Shifts.Dz));
+
             X += Shifts.Dx;
             Y += Shifts.Dy;
             Z += Shifts.Dz;
@@ -138,7 +144,9 @@ namespace FlightTraining.Model
         }
         public void CheckToChangePath()
         {
-            if (IsPointNear()) ChangeShifts();
+            var currentPoint = new Point3D((int) X, (int) Y, (int) Z);
+            var nextPoint = new Point3D(Path[Tracker + 1].X, Path[Tracker + 1].Y, Path[Tracker + 1].Z);
+            if (IsNextPointNear(currentPoint, nextPoint, AircraftOptions.CloseDistance)) ChangeShifts();
         }
 
         private void CheckToHeightHold()
@@ -165,15 +173,29 @@ namespace FlightTraining.Model
                 Shifts.Dx = Shifts.Dy = Shifts.Dz = 0;
                 FlightStage = FlightStage.NeedToRemove;
             }
-            
         }
 
-        private bool IsPointNear()
+        /// <summary>
+        /// Метод определяет, находится ли текущее судно на заданном расстоянии от точки,
+        /// которая является следующей точкой в его маршруте. Сравнивается расстояние,
+        /// являющееся суммой расстояний по осям X и Y между двумя точками. Текущая точка,
+        /// следующая точка и расстояние для сравнения передаются во входных параметрах.
+        /// </summary>
+        /// <param name="currentPoint"></param>
+        /// <param name="nextPoint"></param>
+        /// <param name="checkValue"></param>
+        /// <returns></returns>
+
+        private bool IsNextPointNear(Point3D currentPoint, Point3D nextPoint, int checkValue)
         {
-            var dx = Math.Abs(Path[Tracker + 1].X - X);
-            var dy = Math.Abs(Path[Tracker + 1].Y - Y);
-            if (dx + dy <= AircraftOptions.CloseDistance) return true;
-            else return false;
+            // Вычислить разность координат между точкой текущего местоположения и следующей точкой
+            // по оси X и Y.
+            // Взять эти разности по модулю.
+            var dx = Math.Abs(nextPoint.X - currentPoint.X);
+            var dy = Math.Abs(nextPoint.Y - currentPoint.Y);
+            // Сложить их. Проверить, является ли полученная сумма меньшей либо равной заданному значению.
+            // Вернуть результат проверки.
+            return dx + dy <= checkValue;
         }
 
         private void CalcAndSetShifts_Ordinary(int tracker, Shifts shifts = null)

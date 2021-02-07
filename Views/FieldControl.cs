@@ -47,9 +47,9 @@ namespace FlightTraining.Views
             ArrivePlaneTimer = new Timer();
             DepPlaneTimer = new Timer();
             UmvTimer = new Timer();
-            ArrivePlaneTimer.Interval = GetRandomTimerInterval();
-            DepPlaneTimer.Interval = GetRandomTimerInterval();
-            UmvTimer.Interval = GetRandomTimerInterval();
+            ArrivePlaneTimer.Interval = GetRandomTimerInterval(AircraftFlow.Arrive);
+            DepPlaneTimer.Interval = GetRandomTimerInterval(AircraftFlow.Depurture);
+            UmvTimer.Interval = GetRandomTimerInterval(AircraftFlow.Passing);
             ArrivePlaneTimer.Tick += ArrivePlaneTimer_Tick;
             DepPlaneTimer.Tick += DepPlaneTimer_Tick;
             UmvTimer.Tick += UmvTimer_Tick;
@@ -77,7 +77,7 @@ namespace FlightTraining.Views
         {
             var randomTrackId = GetRandomTrackId(0, tracksCount);
             field.AddAircraft(type, flow, randomTrackId, addControl);
-            timer.Interval = GetRandomTimerInterval();
+            timer.Interval = GetRandomTimerInterval(flow);
         }
 
         public int GetRandomTrackId(int leftBorder, int rightBorder)
@@ -85,10 +85,10 @@ namespace FlightTraining.Views
             return ProgramOptions.Random.Next(leftBorder, rightBorder);
         }
 
-        private int GetRandomTimerInterval()
+        private int GetRandomTimerInterval(AircraftFlow flow)
         {
-            return ProgramOptions.Random.Next(AircraftOptions.AircraftInterval.Item1, 
-                AircraftOptions.AircraftInterval.Item2);
+            return ProgramOptions.Random.Next(AircraftOptions.AircraftInterval[flow].Item1, 
+                AircraftOptions.AircraftInterval[flow].Item2);
         }
 
         #endregion 
@@ -197,7 +197,7 @@ namespace FlightTraining.Views
         }
 
         public void StopTimers()
-        {
+        {   
             ArrivePlaneTimer.Stop();
             DepPlaneTimer.Stop();
             UmvTimer.Stop();
@@ -285,12 +285,16 @@ namespace FlightTraining.Views
             Rectangle restrZone, Point3D planePoint)
         {
             var umv = field.Aircrafts[AircraftType.Umv][umvFutureLocation.Key];
+            var minDistX = Math.Min(Math.Abs(umvFutureLocation.Value.X - restrZone.Left),
+                Math.Abs(umvFutureLocation.Value.X - restrZone.Right));
+
             if (restrZone.Contains(new Point(umvFutureLocation.Value.X, umvFutureLocation.Value.Y)))
             {
+                
                 umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);
                 return true;
             }
-            else if (Convertation.ConvertPixelsToMeters(
+            if (Convertation.ConvertPixelsToMeters(
                 GetDistanceBetween(umvFutureLocation.Value, planePoint)) < AircraftOptions.ConflictDistance)
             {
                 umv.SetHeightToGain(AircraftOptions.UmvTracksGainHeight[umv.TrackId]);

@@ -56,7 +56,13 @@ namespace FlightTraining.Model
             { AircraftType.Umv, 50 }
         };
 
-        public static readonly Tuple<int, int> AircraftInterval = Tuple.Create(30000, 50000);
+        public static readonly Dictionary<AircraftFlow, Tuple<int, int>> AircraftInterval =
+            new Dictionary<AircraftFlow, Tuple<int, int>>
+            {
+                {AircraftFlow.Arrive, Tuple.Create(20000, 30000)},
+                {AircraftFlow.Depurture, Tuple.Create(20000, 40000)},
+                {AircraftFlow.Passing, Tuple.Create(30000, 40000)}
+            };
 
         public static readonly Dictionary<AircraftType, int> AircraftsImageSizes = new Dictionary<AircraftType, int>
         {
