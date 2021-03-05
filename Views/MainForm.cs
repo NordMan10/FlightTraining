@@ -19,19 +19,19 @@ namespace FlightTraining
             ShowStartScreen(model);
         }
 
-        private void Model_StageChanged(GameStage stage)
+        private void Model_StageChanged(ModelStage stage)
         {
             switch(stage)
             {
-                case GameStage.NotStarted:
+                case ModelStage.NotStarted:
                     ShowStartScreen(model);
                     break;
-                case GameStage.Started:
+                case ModelStage.Started:
                     ShowMainScreen(model);
                     break;
-                case GameStage.Simulating:
+                case ModelStage.Simulating:
                     break;
-                case GameStage.Paused:
+                case ModelStage.Paused:
                     break;
                 default:
                     ShowStartScreen(model);

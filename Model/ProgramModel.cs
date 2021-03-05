@@ -7,47 +7,47 @@ namespace FlightTraining.Model
     {
         public ProgramModel()
         {
-            Stage = GameStage.NotStarted;
+            Stage = ModelStage.NotStarted;
         }
 
         public Stopwatch Stopwatch { get; private set; }
 
-        public GameStage Stage { get; private set; }
+        public ModelStage Stage { get; private set; }
 
-        public event Action<GameStage> StageChanged;
+        public event Action<ModelStage> StageChanged;
 
         public void Begin()
         {
             Stopwatch = new Stopwatch();
 
-            ChangeStage(GameStage.Started);
+            ChangeStage(ModelStage.Started);
         }
 
         public void Start()
         {
             Stopwatch.Start();
 
-            ChangeStage(GameStage.Simulating);
+            ChangeStage(ModelStage.Simulating);
         }
 
         public void Stop()
         {
             Stopwatch.Reset();
             
-            ChangeStage(GameStage.Started);
+            ChangeStage(ModelStage.Started);
         }
 
         public void Pause()
         {
             Stopwatch.Stop();
 
-            ChangeStage(GameStage.Paused);
+            ChangeStage(ModelStage.Paused);
         }
 
-        private void ChangeStage(GameStage stage)
+        private void ChangeStage(ModelStage stage)
         {
             Stage = stage;
-            StageChanged?.Invoke(stage);
+            StageChanged?.Invoke(Stage);
         }
 
         public TimeSpan GetStopwatchElapsedTime()

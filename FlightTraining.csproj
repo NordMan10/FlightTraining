@@ -59,7 +59,7 @@
     <Compile Include="Model\Enums\PointsType.cs" />
     <Compile Include="Model\Field.cs" />
     <Compile Include="Model\Enums\FlightStage.cs" />
-    <Compile Include="Model\Enums\GameStage.cs" />
+    <Compile Include="Model\Enums\ModelStage.cs" />
     <Compile Include="Model\IAircraft.cs" />
     <Compile Include="Model\IField.cs" />
     <Compile Include="Model\IProgramModel.cs" />

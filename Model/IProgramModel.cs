@@ -6,9 +6,9 @@ namespace FlightTraining.Model
 {
     public interface IProgramModel
     {
-        GameStage Stage { get; }
+        ModelStage Stage { get; }
 
-        event Action<GameStage> StageChanged;
+        event Action<ModelStage> StageChanged;
 
         void Begin();
 

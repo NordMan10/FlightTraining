@@ -37,7 +37,6 @@ namespace FlightTraining.Views
             this.topPanel = new System.Windows.Forms.Panel();
             this.controlPanel = new System.Windows.Forms.TableLayoutPanel();
             this.startButton = new System.Windows.Forms.Button();
-            //this.someButton = new System.Windows.Forms.Button();
             this.pauseButton = new System.Windows.Forms.Button();
             this.clock = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -103,7 +102,6 @@ namespace FlightTraining.Views
             this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 7F));
             this.controlPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.controlPanel.Controls.Add(this.startButton, 1, 1);
-            //this.controlPanel.Controls.Add(this.someButton, 5, 1);
             this.controlPanel.Controls.Add(this.pauseButton, 3, 1);
             this.controlPanel.Controls.Add(this.clock, 7, 1);
             this.controlPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -118,30 +116,20 @@ namespace FlightTraining.Views
             // 
             // startButton
             // 
+            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.startButton.BackColor = System.Drawing.Color.LimeGreen;
             this.startButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.startButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.startButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.startButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.startButton.Location = new System.Drawing.Point(173, 16);
+            this.startButton.Location = new System.Drawing.Point(71, 17);
             this.startButton.Name = "startButton";
             this.startButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.startButton.Size = new System.Drawing.Size(107, 41);
+            this.startButton.Size = new System.Drawing.Size(89, 31);
             this.startButton.TabIndex = 2;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = false;
-            // 
-            // someButton
-            // 
-            //this.someButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            //this.someButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            //this.someButton.Location = new System.Drawing.Point(625, 16);
-            //this.someButton.Name = "someButton";
-            //this.someButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            //this.someButton.Size = new System.Drawing.Size(107, 41);
-            //this.someButton.TabIndex = 4;
-            //this.someButton.Text = "Something";
-            //this.someButton.UseVisualStyleBackColor = true;
             // 
             // pauseButton
             // 
@@ -149,10 +137,10 @@ namespace FlightTraining.Views
             this.pauseButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pauseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.pauseButton.Font = new System.Drawing.Font("Roboto Slab", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.pauseButton.Location = new System.Drawing.Point(399, 16);
+            this.pauseButton.Location = new System.Drawing.Point(234, 17);
             this.pauseButton.Name = "pauseButton";
             this.pauseButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.pauseButton.Size = new System.Drawing.Size(107, 41);
+            this.pauseButton.Size = new System.Drawing.Size(89, 31);
             this.pauseButton.TabIndex = 3;
             this.pauseButton.Text = "Pause";
             this.pauseButton.UseVisualStyleBackColor = false;
@@ -161,12 +149,13 @@ namespace FlightTraining.Views
             // 
             this.clock.Dock = System.Windows.Forms.DockStyle.Fill;
             this.clock.Font = new System.Drawing.Font("Roboto Slab", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.clock.Location = new System.Drawing.Point(851, 13);
+            this.clock.Location = new System.Drawing.Point(902, 14);
             this.clock.Name = "clock";
-            this.clock.Size = new System.Drawing.Size(107, 47);
+            this.clock.Size = new System.Drawing.Size(89, 37);
             this.clock.TabIndex = 5;
             this.clock.Text = "00:00:00";
             this.clock.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.clock.Click += new System.EventHandler(this.clock_Click);
             // 
             // pictureBox1
             // 
@@ -193,7 +182,7 @@ namespace FlightTraining.Views
             // 
             // graphicTimer
             // 
-            this.graphicTimer.Interval = ProgramOptions.GraphicTimerInterval;
+            this.graphicTimer.Interval = 250;
             // 
             // MainControl
             // 

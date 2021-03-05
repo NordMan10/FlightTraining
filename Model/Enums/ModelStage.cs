@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FlightTraining.Model
 {
-    public enum GameStage
+    public enum ModelStage
     {
         NotStarted = 0,
         Started,

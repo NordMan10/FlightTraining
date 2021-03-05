@@ -16,7 +16,7 @@ namespace FlightTraining.Views
 
         }
 
-        private bool configured = false;
+        private bool configured;
 
         public void Configure(IProgramModel model_)
         {
@@ -63,7 +63,7 @@ namespace FlightTraining.Views
 
         private void StopButton_Click(object sender, EventArgs e)
         {
-            if(model.Stage == GameStage.Paused) ResetPauseButton();
+            if(model.Stage == ModelStage.Paused) ResetPauseButton();
 
             StopAllTimers();
 
@@ -80,13 +80,13 @@ namespace FlightTraining.Views
 
         private void PauseButton_Click(object sender, EventArgs e)
         {
-            if (model.Stage != GameStage.Simulating)
+            if (model.Stage != ModelStage.Simulating)
             {
                 MessageBox.Show("Сначала запустите симуляцию", "Ошибка!", MessageBoxButtons.OK);
                 return;
             }
 
-            StopAllTimers(GameStage.Paused);
+            StopAllTimers(ModelStage.Paused);
 
             pauseButton.Text = "Continue";
             pauseButton.Click -= PauseButton_Click;
@@ -115,13 +115,18 @@ namespace FlightTraining.Views
             graphicTimer.Start();
         }
 
-        private void StopAllTimers(GameStage stage = GameStage.Started)
+        private void StopAllTimers(ModelStage stage = ModelStage.Started)
         {
-            if (stage == GameStage.Paused) model.Pause();
+            if (stage == ModelStage.Paused) model.Pause();
             else model.Stop();
             fieldControl.StopTimers();
             clockTimer.Stop();
             graphicTimer.Stop();
+        }
+
+        private void clock_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
